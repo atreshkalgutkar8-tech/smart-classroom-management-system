@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+
+<header class="topbar"
+        th:fragment="topbar(title, subtitle)">
+
+    <div>
+        <h1 class="page-title" th:text="${title}">
+            Dashboard
+        </h1>
+
+        <p class="page-subtitle" th:text="${subtitle}">
+            Welcome to Smart Classroom
+        </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
+
+        <button type="button"
+                id="themeToggle"
+                class="btn btn-secondary"
+                onclick="toggleTheme()">
+            🌙 Dark Mode
+        </button>
+
+        <div class="profile-info">
+            <span>Logged in as</span>
+
+            <strong sec:authentication="name"
+                    style="color: var(--text-primary); margin-left: 5px;">
+                User
+            </strong>
+        </div>
+
+    </div>
+
+    <!-- IMPORTANT: Script is now INSIDE the fragment -->
+    <script th:src="@{/js/theme.js}" defer></script>
+
+</header>
+
+</body>
+</html>

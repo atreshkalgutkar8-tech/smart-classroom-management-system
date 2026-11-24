@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Communication | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Student Communication', 'Private messages with students in your assigned classes')}"></div>
+        <section class="dashboard-content">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+            <div class="page-header">
+                <h1>Student Communication</h1>
+                <p>Send encouragement, learning instructions, and feedback to your students.</p>
+                <p class="page-subtitle" th:text="${unreadCount + ' unread messages'}">0 unread messages</p>
+            </div>
+
+            <form class="card" method="post" th:action="@{/teacher/students/communication/open}"
+                  style="margin-bottom:22px;">
+                <div class="form-group">
+                    <label class="form-label" for="studentId">Start or open a student conversation</label>
+                    <select class="form-control" id="studentId" name="studentId" required>
+                        <option value="">Choose an authorized student</option>
+                        <option th:each="student : ${students}" th:value="${student.id}"
+                                th:text="${student.fullName + ' - Grade ' + student.grade + ', Section ' + student.section}"></option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" type="submit">Open Conversation</button>
+            </form>
+
+            <div class="card" th:each="thread : ${conversations}" style="margin-bottom:14px;">
+                <h2 th:text="${thread.studentName}">Student</h2>
+                <p class="page-subtitle">
+                    Grade <span th:text="${thread.grade}">1</span>, Section
+                    <span th:text="${thread.section}">A</span>
+                    <span th:if="${thread.unreadCount > 0}" class="badge"
+                          th:text="${thread.unreadCount + ' unread'}">1 unread</span>
+                </p>
+                <p th:if="${thread.lastMessage != null}" style="white-space:pre-wrap;"
+                   th:text="${thread.lastMessage}">Latest message</p>
+                <p th:if="${thread.lastMessage == null}" class="page-subtitle">No messages yet.</p>
+                <p class="page-subtitle" th:if="${thread.lastMessageAt != null}"
+                   th:text="${#temporals.format(thread.lastMessageAt, 'dd MMM yyyy, hh:mm a')}">Message time</p>
+                <a class="btn btn-primary"
+                   th:href="@{/teacher/students/communication/{id}(id=${thread.id})}">Open Conversation</a>
+            </div>
+            <div class="card" th:if="${#lists.isEmpty(conversations)}">
+                No conversations yet. Choose a student above to start one.
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Parent Communication</title><link rel="stylesheet" th:href="@{/css/dashboard.css}"><script th:src="@{/js/theme.js}" defer></script>    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body><div class="dashboard-layout"><div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+<main class="main-content role-ui teacher-ui"><div th:replace="~{fragments/topbar :: topbar('Parent Communication', 'Private conversations with parents of your students')}"></div>
+<section class="dashboard-content">
+    <p style="margin-bottom:20px;"><a class="btn btn-secondary" th:href="@{/teacher/parents}">Parent List</a></p>
+    <div class="card" th:each="thread : ${conversations}" style="margin-bottom:14px;">
+        <h2 th:text="${thread.otherName}">Parent</h2>
+        <p class="page-subtitle">About <strong th:text="${thread.studentName}">Student</strong>
+            <span th:if="${thread.unreadCount > 0}" class="badge" th:text="${thread.unreadCount + ' unread'}">1 unread</span>
+        </p>
+        <p class="page-subtitle" th:text="${#temporals.format(thread.updatedAt, 'dd MMM yyyy, hh:mm a')}">Updated</p>
+        <a class="btn btn-primary" th:href="@{/teacher/parents/conversations/{id}(id=${thread.id})}">Open conversation</a>
+    </div>
+    <div class="card" th:if="${#lists.isEmpty(conversations)}">No parent conversations yet. Open one from the Parent List or a student profile.</div>
+</section></main></div></body></html>

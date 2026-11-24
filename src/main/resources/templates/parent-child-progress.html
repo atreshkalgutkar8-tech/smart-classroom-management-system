@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child Progress | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('PARENT')}"></div>
+    <main class="main-content role-ui parent-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Child Progress', 'Completed games and subject performance')}"></div>
+        <section class="dashboard-content">
+            <p style="margin-bottom:22px;"><a class="btn btn-secondary" th:href="@{/parent/dashboard}">Back to Parent Dashboard</a></p>
+            <div class="page-header">
+                <h1 th:text="${report.child.fullName}">Student name</h1>
+                <p>Grade <span th:text="${report.child.grade}">1</span>
+                    <span th:if="${report.child.section != null}"> · Section <span th:text="${report.child.section}">A</span></span>
+                </p>
+            </div>
+
+            <h2 class="section-title">Overview</h2>
+            <div class="stats-grid">
+                <article class="card"><h3>Assigned games</h3><p class="page-subtitle" th:text="${report.totalAssignedGames}">0</p></article>
+                <article class="card"><h3>Completed games</h3><p class="page-subtitle" th:text="${report.completedGames}">0</p></article>
+                <article class="card"><h3>Pending games</h3><p class="page-subtitle" th:text="${report.pendingGames}">0</p></article>
+                <article class="card"><h3>Total attempts</h3><p class="page-subtitle" th:text="${report.totalAttempts}">0</p></article>
+                <article class="card">
+                    <h3>Best completed score</h3>
+                    <p class="page-subtitle" th:if="${report.bestScorePercentage != null}"
+                       th:text="${#numbers.formatDecimal(report.bestScorePercentage, 1, 1) + '%'}">0%</p>
+                    <p class="page-subtitle" th:if="${report.bestScorePercentage == null}">No completed attempts yet</p>
+                </article>
+                <article class="card">
+                    <h3>Average completed score</h3>
+                    <p class="page-subtitle" th:if="${report.averageScorePercentage != null}"
+                       th:text="${#numbers.formatDecimal(report.averageScorePercentage, 1, 1) + '%'}">0%</p>
+                    <p class="page-subtitle" th:if="${report.averageScorePercentage == null}">No completed attempts yet</p>
+                </article>
+                <article class="card">
+                    <h3>Game completion</h3>
+                    <p class="page-subtitle" th:if="${report.completionPercentage != null}"
+                       th:text="${#numbers.formatDecimal(report.completionPercentage, 1, 1) + '%'}">0%</p>
+                    <p class="page-subtitle" th:if="${report.completionPercentage == null}">No games assigned</p>
+                </article>
+            </div>
+            <p class="page-subtitle" style="margin:12px 0 28px;">
+                Completed games count distinct current assignments with a completed attempt. Average score uses all completed attempts; pending games have no completed attempt.
+            </p>
+
+            <h2 class="section-title">Subject Performance</h2>
+            <div class="card" style="overflow-x:auto; margin-bottom:28px;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr>
+                        <th style="text-align:left; padding:12px;">Subject</th>
+                        <th style="text-align:left; padding:12px;">Assigned</th>
+                        <th style="text-align:left; padding:12px;">Completed</th>
+                        <th style="text-align:left; padding:12px;">Best score</th>
+                        <th style="text-align:left; padding:12px;">Average score</th>
+                    </tr></thead>
+                    <tbody>
+                    <tr th:each="subject : ${report.subjects}">
+                        <td style="padding:12px;" th:text="${subject.subject}">Mathematics</td>
+                        <td style="padding:12px;" th:text="${subject.assignedGames}">0</td>
+                        <td style="padding:12px;" th:text="${subject.completedGames}">0</td>
+                        <td style="padding:12px;" th:if="${subject.bestScorePercentage != null}"
+                            th:text="${#numbers.formatDecimal(subject.bestScorePercentage, 1, 1) + '%'}">0%</td>
+                        <td style="padding:12px;" th:if="${subject.bestScorePercentage == null}">No activity yet</td>
+                        <td style="padding:12px;" th:if="${subject.averageScorePercentage != null}"
+                            th:text="${#numbers.formatDecimal(subject.averageScorePercentage, 1, 1) + '%'}">0%</td>
+                        <td style="padding:12px;" th:if="${subject.averageScorePercentage == null}">No activity yet</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="section-title">Game Performance History</h2>
+            <div class="card" style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr>
+                        <th style="text-align:left; padding:12px;">Game</th>
+                        <th style="text-align:left; padding:12px;">Type</th>
+                        <th style="text-align:left; padding:12px;">Subject</th>
+                        <th style="text-align:left; padding:12px;">Grade</th>
+                        <th style="text-align:left; padding:12px;">Best score</th>
+                        <th style="text-align:left; padding:12px;">Attempts</th>
+                        <th style="text-align:left; padding:12px;">Status</th>
+                        <th style="text-align:left; padding:12px;">Latest completion</th>
+                    </tr></thead>
+                    <tbody>
+                    <tr th:each="game : ${report.history}">
+                        <td style="padding:12px;" th:text="${game.title}">Game title</td>
+                        <td style="padding:12px;" th:text="${game.gameType}">QUIZ</td>
+                        <td style="padding:12px;" th:text="${game.subject}">English</td>
+                        <td style="padding:12px;" th:text="${game.grade}">1</td>
+                        <td style="padding:12px;" th:if="${game.bestScorePercentage != null}"
+                            th:text="${#numbers.formatDecimal(game.bestScorePercentage, 1, 1) + '%'}">0%</td>
+                        <td style="padding:12px;" th:if="${game.bestScorePercentage == null}">No completed attempt</td>
+                        <td style="padding:12px;" th:text="${game.attemptCount}">0</td>
+                        <td style="padding:12px;" th:text="${game.completed ? 'Completed' : 'Pending'}">Pending</td>
+                        <td style="padding:12px;" th:if="${game.latestCompletion != null}"
+                            th:text="${#temporals.format(game.latestCompletion, 'dd MMM yyyy, hh:mm a')}">Date</td>
+                        <td style="padding:12px;" th:if="${game.latestCompletion == null}">—</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(report.history)}">
+                        <td colspan="8" style="padding:16px;">No games are currently assigned to this child.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

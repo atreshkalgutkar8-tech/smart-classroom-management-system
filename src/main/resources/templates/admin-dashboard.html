@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('ADMIN')}"></div>
+    <main class="main-content role-ui admin-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Admin Dashboard', 'Manage your Smart Classroom platform')}"></div>
+        <div class="page-content">
+            <div class="page-header">
+                <h1>Welcome, Administrator!</h1>
+                <p>Manage users, students, parent links and learning catalogues.</p>
+            </div>
+            <div class="stats-grid">
+                <article class="card">
+                    <h3>User Management</h3>
+                    <p>Review registered teacher, student and parent accounts.</p>
+                    <a th:href="@{/admin/users}" class="btn btn-primary">Manage Users</a>
+                </article>
+                <article class="card">
+                    <h3>Student Management</h3>
+                    <p>Create student accounts, assign grades and sections, and reset passwords.</p>
+                    <a th:href="@{/admin/students}" class="btn btn-primary">Manage Students</a>
+                </article>
+                <article class="card">
+                    <h3>Parent Management</h3>
+                    <p>Connect parent accounts with the correct student accounts.</p>
+                    <a th:href="@{/admin/parent-student-linking}" class="btn btn-primary">Link Parent and Student</a>
+                </article>
+                <article class="card">
+                    <h3>DIY Activity Catalogue</h3>
+                    <p>View the activities created for different grades and subjects.</p>
+                    <a th:href="@{/admin/activities}" class="btn btn-primary">View Activities</a>
+                </article>
+                <article class="card">
+                    <h3>Physical DIY Kits</h3>
+                    <p>Maintain kit details and the items included in each kit.</p>
+                    <a th:href="@{/admin/kits}" class="btn btn-primary">Manage Kits</a>
+                </article>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

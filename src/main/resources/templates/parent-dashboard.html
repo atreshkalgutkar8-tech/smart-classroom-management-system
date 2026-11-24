@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Dashboard | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('PARENT')}"></div>
+    <main class="main-content role-ui parent-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Parent Dashboard', 'Follow your child’s learning progress')}"></div>
+        <section class="dashboard-content">
+            <div class="page-header">
+                <h1>My Children</h1>
+                <p>Select a linked child to view their current learning activity.</p>
+            </div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+            <div class="card" th:if="${#lists.isEmpty(children)}">
+                <h2>No children linked yet</h2>
+                <p class="page-subtitle">Please contact the administrator to link your child's student account.</p>
+            </div>
+
+            <section th:unless="${#lists.isEmpty(children)}">
+                <form class="card" method="get" th:action="@{/parent/dashboard}" style="margin-bottom:24px;">
+                    <div class="form-group">
+                        <label class="form-label" for="childId">Choose a child</label>
+                        <select class="form-control" id="childId" name="childId" required>
+                            <option value="">Select a linked child</option>
+                            <option th:each="child : ${children}" th:value="${child.id}"
+                                    th:text="${child.fullName + ' — Grade ' + child.grade + ', Section ' + child.section}"
+                                    th:selected="${selectedPerformance != null and child.id == selectedPerformance.child.id}"></option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" type="submit">View Performance</button>
+                </form>
+
+                <div class="stats-grid">
+                    <article class="card" th:each="child : ${children}">
+                        <h2 th:text="${child.fullName}">Student name</h2>
+                        <p class="page-subtitle">
+                            Grade <span th:text="${child.grade}">1</span>
+                            <span th:if="${child.section != null}"> · Section <span th:text="${child.section}">A</span></span>
+                        </p>
+                        <a class="btn btn-secondary"
+                           th:href="@{/parent/child/{childId}/progress(childId=${child.id})}">Open progress report</a>
+                        <a class="btn btn-primary" style="margin-top:10px;"
+                           th:href="@{/parent/conversations/new(studentId=${child.id})}">Contact a Teacher</a>
+                        <a class="btn btn-secondary" style="margin-top:10px;"
+                           th:href="@{/parent/complaints/new(studentId=${child.id})}">Submit a Concern</a>
+                    </article>
+                </div>
+            </section>
+
+            <section th:if="${selectedPerformance != null}" style="margin-top:28px;">
+                <h2 class="section-title">
+                    Performance summary for <span th:text="${selectedPerformance.child.fullName}">Student</span>
+                </h2>
+                <div class="stats-grid">
+                    <article class="card"><h3>Assigned games</h3><p class="page-subtitle" th:text="${selectedPerformance.totalAssignedGames}">0</p></article>
+                    <article class="card"><h3>Completed games</h3><p class="page-subtitle" th:text="${selectedPerformance.completedGames}">0</p></article>
+                    <article class="card"><h3>Pending games</h3><p class="page-subtitle" th:text="${selectedPerformance.pendingGames}">0</p></article>
+                    <article class="card"><h3>Total attempts</h3><p class="page-subtitle" th:text="${selectedPerformance.totalAttempts}">0</p></article>
+                    <article class="card">
+                        <h3>Best completed score</h3>
+                        <p class="page-subtitle" th:if="${selectedPerformance.bestScorePercentage != null}"
+                           th:text="${#numbers.formatDecimal(selectedPerformance.bestScorePercentage, 1, 1) + '%'}">0%</p>
+                        <p class="page-subtitle" th:if="${selectedPerformance.bestScorePercentage == null}">No completed attempts yet</p>
+                    </article>
+                    <article class="card">
+                        <h3>Average completed score</h3>
+                        <p class="page-subtitle" th:if="${selectedPerformance.averageScorePercentage != null}"
+                           th:text="${#numbers.formatDecimal(selectedPerformance.averageScorePercentage, 1, 1) + '%'}">0%</p>
+                        <p class="page-subtitle" th:if="${selectedPerformance.averageScorePercentage == null}">No completed attempts yet</p>
+                    </article>
+                    <article class="card">
+                        <h3>Game completion</h3>
+                        <p class="page-subtitle" th:if="${selectedPerformance.completionPercentage != null}"
+                           th:text="${#numbers.formatDecimal(selectedPerformance.completionPercentage, 1, 1) + '%'}">0%</p>
+                        <p class="page-subtitle" th:if="${selectedPerformance.completionPercentage == null}">No games assigned</p>
+                    </article>
+                </div>
+                <p class="page-subtitle" style="margin-top:14px;">
+                    Score averages use completed attempts only. Completion percentage is completed assigned games divided by current assigned games.
+                </p>
+                <a class="btn btn-primary" style="margin-top:12px;"
+                   th:href="@{/parent/child/{childId}/progress(childId=${selectedPerformance.child.id})}">View subject performance and history</a>
+            </section>
+        </section>
+    </main>
+</div>
+</body>
+</html>

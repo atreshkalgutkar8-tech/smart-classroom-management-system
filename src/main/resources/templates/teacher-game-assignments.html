@@ -1,0 +1,320 @@
+﻿
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Assignments | Smart Classroom</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+
+    <style>
+        .page-content {
+            padding: 24px;
+        }
+
+        .assignment-card {
+            background: var(--card-bg, #1c1c28);
+            border: 1px solid var(--border-color, #30303d);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .assignment-card h2 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #444);
+            background: var(--input-bg, #252532);
+            color: var(--text-color, #fff);
+            outline: none;
+        }
+
+        .primary-btn {
+            margin-top: 20px;
+            padding: 12px 22px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .primary-btn:hover {
+            background: #4f46e5;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .assignment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
+
+        .assignment-table th,
+        .assignment-table td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color, #30303d);
+        }
+
+        .assignment-table th {
+            font-size: 13px;
+            color: var(--muted-text, #aaa);
+        }
+
+        .message {
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .success {
+            background: #123d2b;
+            color: #86efac;
+        }
+
+        .error {
+            background: #451c24;
+            color: #fca5a5;
+        }
+
+        .empty-state {
+            padding: 24px;
+            text-align: center;
+            color: var(--muted-text, #aaa);
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></aside>
+
+    <main class="main-content role-ui teacher-ui">
+
+        <div th:replace="~{fragments/topbar :: topbar('Game Assignments', 'Assign educational games to your classes')}"></div>
+
+        <div class="page-content">
+
+            <!-- Success and Error Messages -->
+            <div th:if="${successMessage}"
+                 class="message success"
+                 th:text="${successMessage}">
+            </div>
+
+            <div th:if="${errorMessage}"
+                 class="message error"
+                 th:text="${errorMessage}">
+            </div>
+
+            <!-- Grade Filter -->
+            <section class="assignment-card">
+                <h2>Select Class Grade</h2>
+                <p>Choose a grade to view the games available for that class.</p>
+
+                <form th:action="@{/teacher/games/assignments}" method="get">
+                    <div class="form-group" style="max-width: 300px;">
+                        <label for="gradeFilter">Grade</label>
+
+                        <select id="gradeFilter"
+                                name="grade"
+                                onchange="this.form.submit()">
+
+                            <option value="1" th:selected="${selectedGrade == 1}">Grade 1</option>
+                            <option value="2" th:selected="${selectedGrade == 2}">Grade 2</option>
+                            <option value="3" th:selected="${selectedGrade == 3}">Grade 3</option>
+                            <option value="4" th:selected="${selectedGrade == 4}">Grade 4</option>
+                            <option value="5" th:selected="${selectedGrade == 5}">Grade 5</option>
+
+                        </select>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Create Assignment -->
+            <section class="assignment-card">
+
+                <h2>Assign a Game</h2>
+                <p>Select an educational game and assign it to a grade and section.</p>
+
+                <div th:if="${#lists.isEmpty(games)}" class="empty-state">
+                    No games are available for this grade.
+                    Create a game or select another grade.
+                </div>
+
+                <form th:unless="${#lists.isEmpty(games)}"
+                      th:action="@{/teacher/games/assignments/create}"
+                      method="post">
+
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="gameId">Select Game</label>
+
+                            <select id="gameId" name="gameId" required>
+                                <option value="">Choose a game</option>
+
+                                <option th:each="game : ${games}"
+                                        th:value="${game.id}"
+                                        th:text="${game.title + ' - ' + game.gameType}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="grade">Grade</label>
+
+                            <select id="grade" name="grade" required>
+                                <option value="1" th:selected="${selectedGrade == 1}">Grade 1</option>
+                                <option value="2" th:selected="${selectedGrade == 2}">Grade 2</option>
+                                <option value="3" th:selected="${selectedGrade == 3}">Grade 3</option>
+                                <option value="4" th:selected="${selectedGrade == 4}">Grade 4</option>
+                                <option value="5" th:selected="${selectedGrade == 5}">Grade 5</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="section">Class Section</label>
+                            <input type="text"
+                                   id="section"
+                                   name="section"
+                                   placeholder="Example: A"
+                                   maxlength="20"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deadline">Assignment Deadline</label>
+                            <input type="datetime-local"
+                                   id="deadline"
+                                   name="deadline"
+                                   required>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="primary-btn">
+                        Assign Game
+                    </button>
+
+                </form>
+
+            </section>
+
+            <!-- Teacher's Assignments -->
+            <section class="assignment-card">
+
+                <h2>My Assignments</h2>
+                <p>Delete an assignment to permanently remove it and its results. The underlying game remains available.</p>
+
+                <div th:if="${#lists.isEmpty(assignments)}"
+                     class="empty-state">
+                    You haven't assigned any games yet.
+                </div>
+
+                <div th:unless="${#lists.isEmpty(assignments)}"
+                     class="table-wrapper">
+
+                    <table class="assignment-table">
+
+                        <thead>
+                        <tr>
+                            <th>Game</th>
+                            <th>Grade</th>
+                            <th>Section</th>
+                            <th>Deadline</th>
+                            <th>Assigned On</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <tr th:each="assignment : ${assignments}">
+
+                            <td th:text="${assignment.game.title}"></td>
+
+                            <td th:text="${'Grade ' + assignment.grade}"></td>
+
+                            <td th:text="${assignment.section}"></td>
+
+                            <td th:text="${#temporals.format(assignment.deadline, 'dd MMM yyyy, hh:mm a')}"></td>
+
+                            <td th:text="${#temporals.format(assignment.assignedAt, 'dd MMM yyyy')}"></td>
+
+                            <td th:text="${assignment.active ? 'Active' : 'Previously removed'}"></td>
+
+                            <td>
+                                <form th:action="@{/teacher/games/assignments/{id}/delete(id=${assignment.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Permanently delete this assignment and all of its attempts and answers? The game and its questions will remain.')">
+                                    <input type="hidden"
+                                           th:name="${_csrf.parameterName}"
+                                           th:value="${_csrf.token}">
+                                    <button type="submit" class="btn btn-secondary">
+                                        Delete Assignment Permanently
+                                    </button>
+                                </form>
+                            </td>
+
+                        </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

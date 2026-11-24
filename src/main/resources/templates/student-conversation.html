@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Messages | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></div>
+    <main class="main-content student-page student-conversation-page">
+        <div th:replace="~{fragments/topbar :: topbar('My Messages', 'A friendly conversation with your teacher')}"></div>
+        <section class="dashboard-content">
+            <p class="student-back-link">
+                <a class="btn btn-secondary" th:href="@{/student/communication}">Back to messages</a>
+            </p>
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+            <div class="page-header">
+                <h1 th:text="${conversation.teacherName}">Teacher</h1>
+                <p>You can ask a question or reply to your teacher here.</p>
+            </div>
+            <div class="card student-message-thread">
+                <article th:each="message : ${conversation.messages}"
+                         class="student-message-item">
+                    <strong th:text="${message.senderName}">Sender</strong>
+                    <span class="page-subtitle" th:text="${' · ' + message.senderRole}"> · TEACHER</span>
+                    <span class="page-subtitle" th:text="${' · ' + #temporals.format(message.sentAt, 'dd MMM yyyy, hh:mm a')}"> · time</span>
+                    <span class="page-subtitle" th:if="${message.readAt != null}"> · Read</span>
+                    <p class="student-message-body" th:text="${message.content}">Message content</p>
+                </article>
+                <p th:if="${#lists.isEmpty(conversation.messages)}">No messages yet. You can say hello to your teacher.</p>
+            </div>
+            <form class="card student-reply-form" method="post"
+                  th:action="@{/student/communication/{id}/messages(id=${conversation.id})}">
+                <div class="form-group">
+                    <label class="form-label" for="message">Your reply</label>
+                    <textarea class="form-control" id="message" name="content" rows="4"
+                              maxlength="4000" required></textarea>
+                </div>
+                <button class="btn btn-primary" type="submit">Send Reply</button>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

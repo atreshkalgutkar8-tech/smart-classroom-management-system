@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Learning Resources | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Session Learning Resources', 'Choose approved content for classroom presentation')}"></div>
+        <section class="dashboard-content">
+            <p style="margin-bottom:20px;"><a class="btn btn-secondary" th:href="@{/teacher/sessions}">Back to Sessions</a></p>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <header class="page-header">
+                <h1 th:text="${manager.session.title}">Session title</h1>
+                <p>Grade <span th:text="${manager.session.grade}">1</span>
+                    <span th:text="${' · ' + manager.session.subject + ' · ' + manager.session.topic}"> · Subject · Topic</span>
+                </p>
+                <p class="page-subtitle">Session status: <strong th:text="${manager.session.status}">PLANNED</strong></p>
+                <a class="btn btn-primary" th:href="@{/teacher/sessions/{id}/presentation(id=${manager.session.id})}">Open Presentation Screen</a>
+            </header>
+
+            <form class="card" method="post"
+                  th:if="${manager.editable}"
+                  th:action="@{/teacher/sessions/{id}/resources(id=${manager.session.id})}"
+                  style="margin-bottom:24px;">
+                <h2 class="section-title">Add Learning Resource</h2>
+                <p class="page-subtitle">Add a media URL, a written story, or other teacher-approved material. Resources play in the order shown.</p>
+                <div class="stats-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                    <div class="form-group">
+                        <label class="form-label" for="title">Title</label>
+                        <input class="form-control" id="title" name="title" maxlength="180" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="resourceType">Resource type</label>
+                        <select class="form-control" id="resourceType" name="resourceType" required>
+                            <option value="">Select a type</option>
+                            <option th:each="type : ${resourceTypes}" th:value="${type}" th:text="${type}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label" for="description">Description (optional)</label>
+                        <input class="form-control" id="description" name="description" maxlength="500">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label" for="resourceUrl">Media or material URL (optional for written stories)</label>
+                        <input class="form-control" id="resourceUrl" name="resourceUrl" type="url" maxlength="2048" placeholder="https://...">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label" for="contentText">Story text or supporting material (optional)</label>
+                        <textarea class="form-control" id="contentText" name="contentText" rows="6" maxlength="20000"></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Add to Session</button>
+            </form>
+
+            <div class="page-header"><h2>Presentation Order</h2><p>Resources are shown in this order during the presentation.</p></div>
+            <div class="card" th:each="resource,stat : ${manager.resources}" style="margin-bottom:14px;">
+                <div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;">
+                    <div>
+                        <p class="page-subtitle" th:text="${'Resource ' + (stat.index + 1) + ' · ' + resource.resourceType}">Resource 1 · IMAGE</p>
+                        <h3 th:text="${resource.title}">Resource title</h3>
+                        <p class="page-subtitle" th:if="${resource.description != null}" th:text="${resource.description}">Description</p>
+                        <p th:if="${resource.resourceUrl != null}" class="page-subtitle" style="overflow-wrap:anywhere;" th:text="${resource.resourceUrl}">URL</p>
+                        <p th:if="${resource.contentText != null}" style="white-space:pre-wrap;" th:text="${resource.contentText}">Text</p>
+                    </div>
+                    <form method="post" th:if="${manager.editable}"
+                          th:action="@{/teacher/sessions/{sessionId}/resources/{resourceId}/delete(sessionId=${manager.session.id},resourceId=${resource.id})}"
+                          onsubmit="return confirm('Remove this resource from the session?')">
+                        <button class="btn btn-secondary" type="submit">Remove Resource</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card" th:if="${#lists.isEmpty(manager.resources)}">
+                No resources are attached to this session yet.
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

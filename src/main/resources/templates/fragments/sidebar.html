@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <aside class="sidebar" th:fragment="sidebar(role)">
+
+        <div class="sidebar-brand">
+            Smart<span>Classroom</span>
+        </div>
+
+        <p class="sidebar-section">Main Menu</p>
+
+        <!-- Teacher Menu -->
+        <div class="teacher-navigation" th:if="${role == 'TEACHER'}">
+
+            <a th:href="@{/teacher/dashboard}" class="sidebar-link" data-nav-page="teacher-dashboard">
+                <span>&#9632;</span> Dashboard
+            </a>
+
+            <a th:href="@{/teacher/sessions}" class="sidebar-link" data-nav-page="teacher-sessions">
+                <span>&#9633;</span> Classroom Sessions
+            </a>
+
+            <details class="teacher-nav-group" data-nav-group="games">
+                <summary class="sidebar-link"><span>&#10022;</span> Games &amp; Assignments</summary>
+                <div class="teacher-nav-children">
+                    <a th:href="@{/teacher/activities}" class="sidebar-link" data-nav-page="teacher-activities">DIY Activities</a>
+                    <a th:href="@{/teacher/games}" class="sidebar-link" data-nav-page="teacher-games"><span>&#9827;</span> Educational Games</a>
+                    <a th:href="@{/teacher/games/assignments}" class="sidebar-link" data-nav-page="teacher-assignments"><span>&#9643;</span> Game Assignments</a>
+                </div>
+            </details>
+
+            <details class="teacher-nav-group" data-nav-group="students">
+                <summary class="sidebar-link"><span>&#9825;</span> Students</summary>
+                <div class="teacher-nav-children">
+                    <a th:href="@{/teacher/students}" class="sidebar-link" data-nav-page="teacher-student-list">Student List</a>
+                    <a th:href="@{/teacher/students(view='performance')}" class="sidebar-link" data-nav-page="teacher-student-performance">Student Performance</a>
+                    <a th:href="@{/teacher/students/communication}" class="sidebar-link" data-nav-page="teacher-student-communication">Student Communication</a>
+                </div>
+            </details>
+
+            <details class="teacher-nav-group" data-nav-group="parents">
+                <summary class="sidebar-link"><span>&#9827;</span> Parents</summary>
+                <div class="teacher-nav-children">
+                    <a th:href="@{/teacher/parents}" class="sidebar-link" data-nav-page="teacher-parent-list">Parent List</a>
+                    <a th:href="@{/teacher/parents/conversations}" class="sidebar-link" data-nav-page="teacher-parent-communication">Parent Communication</a>
+                    <a th:href="@{/teacher/parents/complaints}" class="sidebar-link" data-nav-page="teacher-parent-complaints">Complaints &amp; Concerns</a>
+                </div>
+            </details>
+
+            <style>
+                .teacher-navigation .teacher-nav-group > summary { list-style: none; cursor: pointer; }
+                .teacher-navigation .teacher-nav-group > summary::-webkit-details-marker { display: none; }
+                .teacher-navigation .teacher-nav-group > summary::after { content: '+'; margin-left: auto; }
+                .teacher-navigation .teacher-nav-group[open] > summary::after { content: '-'; }
+                .teacher-navigation .teacher-nav-children { padding-left: 18px; }
+                .teacher-navigation .teacher-nav-children .sidebar-link { padding-left: 20px; font-size: 13px; }
+            </style>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const nav = document.querySelector('.teacher-navigation');
+                    if (!nav) return;
+                    const path = window.location.pathname;
+                    const query = new URLSearchParams(window.location.search);
+                    let activePage = null;
+                    if (path === '/teacher/dashboard') activePage = 'teacher-dashboard';
+                    else if (path.startsWith('/teacher/sessions')) activePage = 'teacher-sessions';
+                    else if (path === '/teacher/students/communication' || path.startsWith('/teacher/students/communication/')) activePage = 'teacher-student-communication';
+                    else if (path === '/teacher/students' && query.get('view') === 'performance') activePage = 'teacher-student-performance';
+                    else if (path.startsWith('/teacher/students')) activePage = 'teacher-student-list';
+                    else if (path.startsWith('/teacher/parents/conversations')) activePage = 'teacher-parent-communication';
+                    else if (path.startsWith('/teacher/parents/complaints')) activePage = 'teacher-parent-complaints';
+                    else if (path.startsWith('/teacher/parents')) activePage = 'teacher-parent-list';
+                    else if (path.startsWith('/teacher/activities')) activePage = 'teacher-activities';
+                    else if (path.startsWith('/teacher/games/assignments')) activePage = 'teacher-assignments';
+                    else if (path.startsWith('/teacher/games')) activePage = 'teacher-games';
+                    if (!activePage) return;
+                    const activeLink = nav.querySelector('[data-nav-page="' + activePage + '"]')
+                        || Array.from(nav.querySelectorAll('a')).find(function (link) {
+                            const url = new URL(link.href, window.location.origin);
+                            return url.pathname === path && (!url.search || url.search === window.location.search);
+                        });
+                    if (activeLink) {
+                        activeLink.classList.add('active');
+                        const group = activeLink.closest('details');
+                        if (group) group.open = true;
+                    }
+                });
+            </script>
+
+        </div>
+        <!-- Student Menu -->
+        <div th:if="${role == 'STUDENT'}">
+
+            <a th:href="@{/student/dashboard}" class="sidebar-link" data-nav-page="student-dashboard">
+                <span>▦</span> Dashboard
+            </a>
+
+            <a th:href="@{/student/activities}" class="sidebar-link" data-nav-page="student-activities">
+                <span>✦</span> Activities
+            </a>
+
+            <a th:href="@{/student/games}" class="sidebar-link" data-nav-page="student-games">
+                <span>♧</span> Games
+            </a>
+
+            <a th:href="@{/student/communication}" class="sidebar-link" data-nav-page="student-communication">
+                <span>&#9993;</span> Communication
+            </a>
+
+        </div>
+
+        <!-- Parent Menu -->
+        <div th:if="${role == 'PARENT'}">
+
+            <a th:href="@{/parent/dashboard}" class="sidebar-link" data-nav-page="parent-dashboard">
+                <span>▦</span> Dashboard
+            </a>
+
+            <a th:href="@{/parent/conversations}" class="sidebar-link" data-nav-page="parent-conversations">Teacher Messages</a>
+            <a th:href="@{/parent/complaints}" class="sidebar-link" data-nav-page="parent-complaints">My Complaints</a>
+
+        </div>
+
+        <!-- Admin Menu -->
+        <div th:if="${role == 'ADMIN'}">
+
+            <a th:href="@{/admin/dashboard}" class="sidebar-link" data-nav-page="admin-dashboard">
+                <span>▦</span> Dashboard
+            </a>
+
+            <a th:href="@{/admin/users}" class="sidebar-link" data-nav-page="admin-users">
+                <span>♙</span> Manage Users
+            </a>
+
+            <a th:href="@{/admin/students}" class="sidebar-link" data-nav-page="admin-students">
+                <span>👨‍🎓</span> Manage Students
+            </a>
+
+            <!-- Parent-Student Linking -->
+            <a th:href="@{/admin/parent-student-linking}"
+               class="sidebar-link" data-nav-page="admin-parent-linking">
+                <span>♧</span> Parent-Student Linking
+            </a>
+
+            <a th:href="@{/admin/activities}" class="sidebar-link" data-nav-page="admin-activities">
+                <span>✦</span> Activities
+            </a>
+
+            <a th:href="@{/admin/kits}" class="sidebar-link" data-nav-page="admin-kits">
+                <span>▣</span> DIY Kits
+            </a>
+
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const path = window.location.pathname;
+                let activePage = null;
+                if (path.startsWith('/student/games')) activePage = 'student-games';
+                else if (path.startsWith('/student/activities')) activePage = 'student-activities';
+                else if (path.startsWith('/student/communication')) activePage = 'student-communication';
+                else if (path === '/student/dashboard') activePage = 'student-dashboard';
+                else if (path.startsWith('/parent/conversations')) activePage = 'parent-conversations';
+                else if (path.startsWith('/parent/complaints')) activePage = 'parent-complaints';
+                else if (path.startsWith('/parent/')) activePage = 'parent-dashboard';
+                else if (path.startsWith('/admin/users')) activePage = 'admin-users';
+                else if (path.startsWith('/admin/students')) activePage = 'admin-students';
+                else if (path.startsWith('/admin/parent-student-linking')) activePage = 'admin-parent-linking';
+                else if (path.startsWith('/admin/activities')) activePage = 'admin-activities';
+                else if (path.startsWith('/admin/kits')) activePage = 'admin-kits';
+                else if (path === '/admin/dashboard') activePage = 'admin-dashboard';
+                if (!activePage) return;
+                const activeLink = document.querySelector('[data-nav-page="' + activePage + '"]');
+                if (activeLink) activeLink.classList.add('active');
+            });
+        </script>
+
+        <!-- Account Menu -->
+        <p class="sidebar-section">Account</p>
+
+        <form th:action="@{/logout}" method="post">
+
+            <button type="submit"
+                    class="sidebar-link"
+                    style="width:100%; background:none; border:none; cursor:pointer; text-align:left;">
+
+                <span>↪</span> Logout
+
+            </button>
+
+        </form>
+
+    </aside>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIY Activities | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('ADMIN')}"></aside>
+    <main class="main-content role-ui admin-ui">
+        <header th:replace="~{fragments/topbar :: topbar('DIY Activities', 'Browse the teacher-created activity catalogue')}"></header>
+        <section class="page-content">
+            <div class="page-heading"><h2>Activity Catalogue</h2><p>Activities are created by teachers and organized by grade, subject and topic.</p></div>
+            <div class="stats-grid" th:if="${!#lists.isEmpty(activities)}">
+                <article class="card" th:each="activity : ${activities}">
+                    <p class="status-badge" th:text="${'Grade ' + activity.grade + ' · ' + activity.subject}">Grade · Subject</p>
+                    <h3 th:text="${activity.title}">Activity title</h3>
+                    <p><strong>Topic:</strong> <span th:text="${activity.topic}">Topic</span></p>
+                    <p th:text="${activity.learningObjective}">Learning objective</p>
+                    <p class="page-subtitle" th:text="${'Created by ' + activity.createdBy}">Teacher</p>
+                </article>
+            </div>
+            <div class="empty-state" th:if="${#lists.isEmpty(activities)}"><h3>No activities yet</h3><p>Teacher-created DIY activities will appear here.</p></div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

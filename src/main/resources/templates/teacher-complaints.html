@@ -1,0 +1,17 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Complaints and Concerns</title><link rel="stylesheet" th:href="@{/css/dashboard.css}"><script th:src="@{/js/theme.js}" defer></script>    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body><div class="dashboard-layout"><div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+<main class="main-content role-ui teacher-ui"><div th:replace="~{fragments/topbar :: topbar('Complaints and Concerns', 'Review concerns from parents of your students')}"></div>
+<section class="dashboard-content">
+    <nav class="card" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;"><a class="btn btn-secondary" th:href="@{/teacher/parents}">Parent List</a><a class="btn btn-secondary" th:href="@{/teacher/parents/conversations}">Parent Communication</a><a class="btn btn-primary" th:href="@{/teacher/parents/complaints}">Complaints and Concerns</a></nav>
+    <article class="card" th:each="complaint : ${complaints}" style="margin-bottom:14px;">
+        <h2 th:text="${complaint.title}">Concern</h2>
+        <p>Student <strong th:text="${complaint.studentName}">Student</strong> · Parent <strong th:text="${complaint.parentName}">Parent</strong></p>
+        <p class="page-subtitle">Status: <strong th:text="${complaint.status}">OPEN</strong> · Updated <span th:text="${#temporals.format(complaint.updatedAt,'dd MMM yyyy, hh:mm a')}">Date</span></p>
+        <p class="page-subtitle" th:if="${complaint.unreadCount > 0}" th:text="${complaint.unreadCount + ' unread replies'}">Unread</p>
+        <a class="btn btn-primary" th:href="@{/teacher/parents/complaints/{id}(id=${complaint.id})}">Open complaint</a>
+    </article>
+    <div class="card" th:if="${#lists.isEmpty(complaints)}">No complaints or concerns have been submitted.</div>
+</section></main></div></body></html>

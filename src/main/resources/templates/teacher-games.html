@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Games | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></aside>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Educational Games', 'Browse shared games and manage your own activities')}"></div>
+
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <section class="card" style="margin-bottom: 28px;">
+            <h2 class="section-title">Create a Custom Game</h2>
+            <form th:action="@{/teacher/games/create}" method="post">
+                <div class="stats-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                    <div class="form-group">
+                        <label class="form-label" for="title">Title</label>
+                        <input class="form-control" id="title" name="title" maxlength="150" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="gameType">Game Type</label>
+                        <select class="form-control" id="gameType" name="gameType" required>
+                            <option value="">Choose a type</option>
+                            <option th:each="type : ${gameTypes}" th:value="${type}" th:text="${type}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="subject">Subject</label>
+                        <select class="form-control" id="subject" name="subject" required>
+                            <option value="">Choose a subject</option>
+                            <option th:each="subject : ${subjects}" th:value="${subject}" th:text="${subject}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="grade">Grade</label>
+                        <select class="form-control" id="grade" name="grade" required>
+                            <option value="">Choose a grade</option>
+                            <option th:each="grade : ${#numbers.sequence(1,5)}" th:value="${grade}" th:text="${grade}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="puzzleTemplate">Puzzle Template (for Puzzle)</label>
+                        <select class="form-control" id="puzzleTemplate" name="puzzleTemplate">
+                            <option value="">Not a puzzle</option>
+                            <option th:each="template : ${puzzleTemplates}" th:value="${template}" th:text="${template}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="matchingFormat">Matching Format (for Matching)</label>
+                        <select class="form-control" id="matchingFormat" name="matchingFormat">
+                            <option value="">Not matching</option>
+                            <option th:each="format : ${matchingFormats}" th:value="${format}" th:text="${format}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="visibility">Visibility</label>
+                        <select class="form-control" id="visibility" name="visibility" required>
+                            <option th:each="value : ${visibilities}" th:value="${value}" th:text="${value}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" maxlength="1000" rows="3"></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Create Game</button>
+            </form>
+        </section>
+
+        <section style="margin-bottom: 30px;">
+            <h2 class="section-title">My Custom Games</h2>
+            <div class="stats-grid" th:if="${not #lists.isEmpty(customGames)}">
+                <article class="card" th:each="game : ${customGames}">
+                    <h3 th:text="${game.title}">Game title</h3>
+                    <p class="page-subtitle" th:text="${game.description}">Description</p>
+                    <p style="margin-top: 12px;">Subject: <strong th:text="${game.subject}"></strong></p>
+                    <p>Grade: <strong th:text="${game.grade}"></strong></p>
+                    <p>Type: <strong th:text="${game.gameType}"></strong></p>
+                    <p>Visibility: <strong th:text="${game.visibility}"></strong></p>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;">
+                        <a class="btn btn-primary" th:href="@{/teacher/games/{id}/manage(id=${game.id})}">Manage</a>
+                        <a class="btn btn-secondary" th:if="${game.visibility.name() == 'AVAILABLE_TO_STUDENTS'}"
+                           th:href="@{/teacher/games/assignments(grade=${game.grade})}">Assign</a>
+                        <form th:action="@{/teacher/games/{id}/duplicate(id=${game.id})}" method="post">
+                            <button class="btn btn-secondary" type="submit">Duplicate</button>
+                        </form>
+                        <form th:action="@{/teacher/games/{id}/visibility(id=${game.id})}" method="post">
+                            <input type="hidden" name="visibility"
+                                   th:value="${game.visibility.name() == 'AVAILABLE_TO_STUDENTS' ? 'HIDDEN_FROM_STUDENTS' : 'AVAILABLE_TO_STUDENTS'}">
+                            <button class="btn btn-secondary" type="submit"
+                                    th:text="${game.visibility.name() == 'AVAILABLE_TO_STUDENTS' ? 'Hide from Students' : 'Show to Students'}"></button>
+                        </form>
+                        <form th:action="@{/teacher/games/{id}/delete(id=${game.id})}" method="post"
+                              onsubmit="return confirm('Permanently delete this game and its assignments, attempts, answers and questions?')">
+                            <button class="btn btn-secondary" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+            <p class="card" th:if="${#lists.isEmpty(customGames)}">You have not created any custom games yet.</p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Preloaded Games</h2>
+            <div class="stats-grid" th:if="${not #lists.isEmpty(preloadedGames)}">
+                <article class="card" th:each="game : ${preloadedGames}">
+                    <h3 th:text="${game.title}">Game title</h3>
+                    <p class="page-subtitle" th:text="${game.description}">Description</p>
+                    <p style="margin-top: 12px;">Subject: <strong th:text="${game.subject}"></strong></p>
+                    <p>Grade: <strong th:text="${game.grade}"></strong></p>
+                    <p>Type: <strong th:text="${game.gameType}"></strong></p>
+                    <p>Visibility: <strong th:text="${game.visibility}"></strong></p>
+                    <a class="btn btn-primary" style="margin-top:16px;"
+                       th:href="@{/teacher/games/assignments(grade=${game.grade})}">Assign to Class</a>
+                </article>
+            </div>
+            <p class="card" th:if="${#lists.isEmpty(preloadedGames)}">Preloaded games are being prepared.</p>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,224 @@
+﻿
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Parent-Student Linking | Smart Classroom</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar('ADMIN')}"></div>
+
+    <main class="main-content role-ui admin-ui">
+
+        <!-- Topbar -->
+        <div th:replace="~{fragments/topbar :: topbar('Parent-Student Linking', 'Connect parent accounts with their children')}"></div>
+
+        <div class="page-content">
+
+            <!-- Page Heading -->
+            <div class="page-header">
+                <div>
+                    <h1>Parent-Student Linking</h1>
+                    <p>Connect registered parents with their children.</p>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div th:if="${successMessage}"
+                 class="alert alert-success"
+                 th:text="${successMessage}">
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${errorMessage}"
+                 class="alert alert-danger"
+                 th:text="${errorMessage}">
+            </div>
+
+            <!-- Linking Card -->
+            <section class="dashboard-card">
+
+                <h2>Link a Parent with a Student</h2>
+
+                <p>
+                    Search for a parent and student, select both accounts,
+                    and connect them.
+                </p>
+
+                <form th:action="@{/admin/parent-student-linking/link}"
+                      method="post">
+
+                    <div class="form-group">
+
+                        <label for="parentId">Select Parent</label>
+
+                        <select id="parentId"
+                                name="parentId"
+                                required>
+
+                            <option value="">Choose a parent</option>
+
+                            <option th:each="parent : ${parents}"
+                                    th:value="${parent.id}"
+                                    th:text="${parent.fullName + ' (' + parent.email + ')'}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="studentId">Select Student</label>
+
+                        <select id="studentId"
+                                name="studentId"
+                                required>
+
+                            <option value="">Choose a student</option>
+
+                            <option th:each="student : ${students}"
+                                    th:value="${student.id}"
+                                    th:text="${student.fullName + ' - Grade ' + student.grade + ' ' + student.section + ' (' + student.email + ')'}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Link Student
+                    </button>
+
+                </form>
+
+            </section>
+
+            <!-- Search Section -->
+            <div class="dashboard-grid">
+
+                <!-- Parent Search -->
+                <section class="dashboard-card">
+
+                    <h2>Find Parent</h2>
+
+                    <form th:action="@{/admin/parent-student-linking}"
+                          method="get">
+
+                        <input type="hidden"
+                               name="studentKeyword"
+                               th:value="${studentKeyword}">
+
+                        <div class="form-group">
+
+                            <label for="parentKeyword">
+                                Search by name or email
+                            </label>
+
+                            <input type="text"
+                                   id="parentKeyword"
+                                   name="parentKeyword"
+                                   placeholder="Enter parent name or email"
+                                   th:value="${parentKeyword}">
+
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Search Parent
+                        </button>
+
+                    </form>
+
+                    <p>
+                        <strong th:text="${#lists.size(parents)}">0</strong>
+                        parent accounts found.
+                    </p>
+
+                    <a th:href="@{/admin/parent-student-linking(
+                        studentKeyword=${studentKeyword})}">
+                        Clear parent search
+                    </a>
+
+                </section>
+
+                <!-- Student Search -->
+                <section class="dashboard-card">
+
+                    <h2>Find Student</h2>
+
+                    <form th:action="@{/admin/parent-student-linking}"
+                          method="get">
+
+                        <input type="hidden"
+                               name="parentKeyword"
+                               th:value="${parentKeyword}">
+
+                        <div class="form-group">
+
+                            <label for="studentKeyword">
+                                Search by name or email
+                            </label>
+
+                            <input type="text"
+                                   id="studentKeyword"
+                                   name="studentKeyword"
+                                   placeholder="Enter student name or email"
+                                   th:value="${studentKeyword}">
+
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Search Student
+                        </button>
+
+                    </form>
+
+                    <p>
+                        <strong th:text="${#lists.size(students)}">0</strong>
+                        student accounts found.
+                    </p>
+
+                    <a th:href="@{/admin/parent-student-linking(
+                        parentKeyword=${parentKeyword})}">
+                        Clear student search
+                    </a>
+
+                </section>
+
+            </div>
+
+            <!-- Information -->
+            <section class="dashboard-card">
+
+                <h2>How Parent-Student Linking Works</h2>
+
+                <ol>
+                    <li>Search for the registered parent.</li>
+                    <li>Search for the registered student.</li>
+                    <li>Select both accounts from the dropdowns.</li>
+                    <li>Click Link Student.</li>
+                    <li>The child becomes accessible through that parent's account.</li>
+                </ol>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

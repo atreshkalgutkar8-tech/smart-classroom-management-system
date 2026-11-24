@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DIY Activity Instructions | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <style>@media print { .sidebar, .topbar, .no-print { display:none !important; } .dashboard-layout { display:block; } .main-content { margin:0 !important; } .page-content { padding:0 !important; } body { background:#fff !important; color:#000 !important; } .card { box-shadow:none !important; border:1px solid #bbb !important; color:#000 !important; } }</style>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></aside>
+    <main class="main-content role-ui teacher-ui">
+        <header class="topbar" th:replace="~{fragments/topbar :: topbar('DIY Activity', 'Activity details and instructions')}"></header>
+        <div class="page-content">
+            <section class="card">
+                <p class="status-badge" th:text="${'Grade ' + detail.activity.grade + ' · ' + detail.activity.subject + ' · ' + detail.activity.topic}">Grade · Subject · Topic</p>
+                <h2 th:text="${detail.activity.title}">Activity title</h2>
+                <p><strong>Learning objective:</strong> <span th:text="${detail.activity.learningObjective}">Objective</span></p>
+                <h3>Required materials</h3><p style="white-space:pre-wrap" th:text="${detail.requiredMaterials}">Materials</p>
+                <h3>Step-by-step instructions</h3><div style="white-space:pre-wrap" th:text="${detail.instructions}">Instructions</div>
+                <p class="page-subtitle" th:text="${'Created by ' + detail.activity.createdBy}">Teacher</p>
+                <div class="no-print" style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary" onclick="window.print()">Print Instructions</button>
+                    <a class="btn btn-secondary" th:href="@{/teacher/activities}">Back to Catalogue</a>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

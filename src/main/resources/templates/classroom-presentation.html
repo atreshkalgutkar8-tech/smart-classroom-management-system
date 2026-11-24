@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Presentation | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <style>
+        .presentation-canvas { min-height: calc(100vh - 100px); padding: clamp(18px, 4vw, 54px); background: #070b14; color: #f8fafc; border-radius: 16px; display: flex; flex-direction: column; }
+        .presentation-heading { text-align: center; margin-bottom: 28px; }
+        .presentation-heading h1 { color: #fff; font-size: clamp(28px, 4vw, 48px); margin: 0 0 10px; }
+        .presentation-heading p { color: #cbd5e1; font-size: clamp(16px, 2vw, 22px); margin: 5px; }
+        .presentation-stage { flex: 1; min-height: 42vh; display: grid; place-items: center; }
+        .presentation-stage img, .presentation-stage video { max-width: 100%; max-height: 62vh; object-fit: contain; border-radius: 12px; }
+        .presentation-stage audio { width: min(760px, 100%); }
+        .presentation-story { width: min(1000px, 100%); max-height: 62vh; overflow: auto; padding: clamp(20px, 4vw, 44px); border-radius: 14px; background: #111827; font-size: clamp(20px, 3vw, 32px); line-height: 1.6; white-space: pre-wrap; }
+        .presentation-controls { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
+        .presentation-controls .btn { font-size: 18px; padding: 16px 26px; }
+        .presentation-fallback { color: #fecaca; text-align: center; font-size: 20px; padding: 22px; }
+        .presentation-canvas:fullscreen { overflow: auto; border-radius: 0; min-height: 100vh; }
+        @media (max-width: 700px) { .presentation-canvas { min-height: auto; } .presentation-stage { min-height: 35vh; } }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Classroom Presentation', 'Present the selected learning resources to your class')}"></div>
+        <section class="dashboard-content">
+            <p style="margin-bottom:18px;">
+                <a class="btn btn-secondary" th:href="@{/teacher/sessions/{id}/resources(id=${presentation.session.id})}">Manage Resources</a>
+                <a class="btn btn-secondary" th:href="@{/teacher/sessions}">Back to Sessions</a>
+            </p>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <div id="presentationCanvas" class="presentation-canvas"
+                 th:attr="data-session-id=${presentation.session.id},data-resource-id=${presentation.currentResource == null ? '' : presentation.currentResource.id}">
+                <header class="presentation-heading">
+                    <p th:text="${'Grade ' + presentation.session.grade + ' · ' + presentation.session.subject}">Grade · Subject</p>
+                    <h1 th:text="${presentation.session.title}">Session title</h1>
+                    <p th:text="${presentation.session.topic}">Topic</p>
+                </header>
+
+                <div th:if="${presentation.active and presentation.currentResource != null}"
+                     class="presentation-stage" id="mediaFrame">
+                    <div style="width:100%;text-align:center;">
+                        <p class="page-subtitle" style="color:#cbd5e1;" th:text="${presentation.currentResource.title}">Resource title</p>
+                        <p class="page-subtitle" style="color:#94a3b8;" th:if="${presentation.currentResource.description != null}"
+                           th:text="${presentation.currentResource.description}">Description</p>
+
+                        <div th:if="${presentation.currentResource.resourceType.name() == 'IMAGE'}">
+                            <img th:src="${presentation.currentResource.resourceUrl}"
+                                 th:alt="${presentation.currentResource.title}"
+                                 onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+                            <p class="presentation-fallback" hidden>Image unavailable. Check the resource URL or network connection.</p>
+                        </div>
+
+                        <div th:if="${presentation.currentResource.resourceType.name() == 'VIDEO'}">
+                            <video id="classroomVideo" controls preload="metadata"
+                                   onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+                                <source th:src="${presentation.currentResource.resourceUrl}">
+                                Your browser cannot play this video.
+                            </video>
+                            <p class="presentation-fallback" hidden>Video unavailable. Check the resource URL or network connection.</p>
+                        </div>
+
+                        <div th:if="${presentation.currentResource.resourceType.name() == 'AUDIO'}">
+                            <audio id="classroomAudio" controls preload="metadata"
+                                   onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+                                <source th:src="${presentation.currentResource.resourceUrl}">
+                                Your browser cannot play this audio.
+                            </audio>
+                            <p class="presentation-fallback" hidden>Audio unavailable. Check the resource URL or network connection.</p>
+                        </div>
+
+                        <div th:if="${presentation.currentResource.resourceType.name() == 'STORY'}">
+                            <article class="presentation-story" th:if="${presentation.currentResource.contentText != null}"
+                                     th:text="${presentation.currentResource.contentText}">Story content</article>
+                            <a class="btn btn-primary" th:if="${presentation.currentResource.contentText == null}"
+                               th:href="${presentation.currentResource.resourceUrl}" target="_blank" rel="noopener noreferrer">Open Story</a>
+                        </div>
+
+                        <div th:if="${presentation.currentResource.resourceType.name() == 'OTHER'}">
+                            <article class="presentation-story" th:if="${presentation.currentResource.contentText != null}"
+                                     th:text="${presentation.currentResource.contentText}">Learning material</article>
+                            <a class="btn btn-primary" th:if="${presentation.currentResource.resourceUrl != null}"
+                               th:href="${presentation.currentResource.resourceUrl}" target="_blank" rel="noopener noreferrer">Open Learning Material</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="presentation-stage" th:if="${presentation.active and presentation.currentResource == null}">
+                    <div class="presentation-story" style="text-align:center;">All resources have been presented. End the presentation when you are ready.</div>
+                </div>
+
+                <div class="presentation-stage" th:if="${!presentation.active and presentation.ended}">
+                    <div class="presentation-story" style="text-align:center;">Presentation ended. The classroom session is still <span th:text="${presentation.session.status}">ONGOING</span>.</div>
+                </div>
+
+                <div class="presentation-stage" th:if="${!presentation.active and !presentation.ended}">
+                    <div class="presentation-story" style="text-align:center;">
+                        <p th:if="${presentation.session.status.name() == 'ONGOING'}">Ready to present <span th:text="${presentation.resourceCount}">0</span> learning resources.</p>
+                        <p th:if="${presentation.session.status.name() != 'ONGOING'}">Start this classroom session before beginning its presentation.</p>
+                    </div>
+                </div>
+
+                <footer class="presentation-controls">
+                    <form method="post" th:if="${!presentation.active and presentation.session.status.name() == 'ONGOING' and presentation.resourceCount > 0}"
+                          th:action="@{/teacher/sessions/{id}/presentation/start(id=${presentation.session.id})}">
+                        <button class="btn btn-primary" type="submit" th:text="${presentation.ended ? 'Start Again' : 'Start Presentation'}">Start Presentation</button>
+                    </form>
+                    <span th:if="${!presentation.active and presentation.session.status.name() == 'ONGOING' and presentation.resourceCount == 0}"
+                          class="page-subtitle" style="color:#cbd5e1;">Add resources before starting.</span>
+                    <span th:if="${presentation.session.status.name() != 'ONGOING'}" class="page-subtitle" style="color:#cbd5e1;">
+                        Start or resume the session from Classroom Sessions.
+                    </span>
+
+                    <button id="mediaPauseToggle" type="button" class="btn btn-secondary"
+                            th:if="${presentation.active and presentation.currentResource != null and (presentation.currentResource.resourceType.name() == 'VIDEO' or presentation.currentResource.resourceType.name() == 'AUDIO')}">Pause Media</button>
+                    <form method="post" th:if="${presentation.active and presentation.position < presentation.resourceCount}"
+                          th:action="@{/teacher/sessions/{id}/presentation/next(id=${presentation.session.id})}">
+                        <button class="btn btn-primary" type="submit">Next Resource</button>
+                    </form>
+                    <form method="post" th:if="${presentation.active}"
+                          th:action="@{/teacher/sessions/{id}/presentation/end(id=${presentation.session.id})}">
+                        <button class="btn btn-secondary" type="submit">End Presentation</button>
+                    </form>
+                    <button type="button" class="btn btn-secondary" onclick="togglePresentationFullscreen()">Full Screen</button>
+                </footer>
+                <p class="page-subtitle" th:if="${presentation.active}"
+                   style="text-align:center;color:#cbd5e1;margin-top:18px;"
+                   th:text="${presentation.position < presentation.resourceCount ? 'Resource ' + (presentation.position + 1) + ' of ' + presentation.resourceCount : 'Presentation complete'}">Resource 1 of 1</p>
+            </div>
+        </section>
+    </main>
+</div>
+<script>
+    function togglePresentationFullscreen() {
+        const canvas = document.getElementById('presentationCanvas');
+        if (!document.fullscreenElement && canvas.requestFullscreen) canvas.requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const media = document.querySelector('#classroomVideo, #classroomAudio');
+        const pauseButton = document.getElementById('mediaPauseToggle');
+        if (!media) return;
+
+        const canvas = document.getElementById('presentationCanvas');
+        const storageKey = 'classroom-media-position:' + canvas.dataset.sessionId + ':' + canvas.dataset.resourceId;
+        const savedPosition = Number(sessionStorage.getItem(storageKey));
+        media.addEventListener('loadedmetadata', function () {
+            if (Number.isFinite(savedPosition) && savedPosition > 0 && savedPosition < media.duration) {
+                media.currentTime = savedPosition;
+            }
+        });
+        media.addEventListener('timeupdate', function () {
+            sessionStorage.setItem(storageKey, String(media.currentTime));
+        });
+        media.addEventListener('ended', function () { sessionStorage.removeItem(storageKey); });
+
+        if (pauseButton) {
+            pauseButton.addEventListener('click', function () {
+                if (media.paused) {
+                    media.play().then(function () { pauseButton.textContent = 'Pause Media'; })
+                        .catch(function () { pauseButton.textContent = 'Use media controls to play'; });
+                } else {
+                    media.pause();
+                    pauseButton.textContent = 'Resume Media';
+                }
+            });
+            media.addEventListener('play', function () { pauseButton.textContent = 'Pause Media'; });
+            media.addEventListener('pause', function () { pauseButton.textContent = 'Resume Media'; });
+        }
+    });
+</script>
+</body>
+</html>

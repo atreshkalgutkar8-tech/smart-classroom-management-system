@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Parents | Smart Classroom</title><link rel="stylesheet" th:href="@{/css/dashboard.css}"><script th:src="@{/js/theme.js}" defer></script>    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body><div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Parents', 'Find linked parents and contact them about a student')}"></div>
+        <section class="dashboard-content">
+            <nav class="card" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
+                <a class="btn btn-primary" th:href="@{/teacher/parents}">Parent List</a>
+                <a class="btn btn-secondary" th:href="@{/teacher/parents/conversations}">Parent Communication</a>
+                <a class="btn btn-secondary" th:href="@{/teacher/parents/complaints}">Complaints and Concerns</a>
+            </nav>
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+            <form method="get" th:action="@{/teacher/parents}" class="card" style="margin-bottom:22px;">
+                <p class="page-subtitle">Search by student name to find the linked parent. Results include linked children in your assigned classes.</p>
+                <div class="stats-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+                    <div class="form-group"><label class="form-label" for="studentName">Student name</label><input class="form-control" id="studentName" name="studentName" th:value="${studentName}" placeholder="e.g. Rahul"></div>
+                    <div class="form-group"><label class="form-label" for="parentName">Parent name or email</label><input class="form-control" id="parentName" name="parentName" th:value="${parentName}"></div>
+                    <div class="form-group"><label class="form-label" for="grade">Grade</label><input class="form-control" type="number" id="grade" name="grade" min="1" max="5" th:value="${selectedGrade}"></div>
+                    <div class="form-group"><label class="form-label" for="section">Section</label><input class="form-control" id="section" name="section" maxlength="20" th:value="${selectedSection}"></div>
+                </div>
+                <button class="btn btn-primary" type="submit">Search</button>
+                <a class="btn btn-secondary" th:href="@{/teacher/parents}">Clear</a>
+            </form>
+            <div class="card" style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:760px;">
+                    <thead><tr><th style="text-align:left;padding:12px;">Student</th><th style="text-align:left;padding:12px;">Grade / section</th><th style="text-align:left;padding:12px;">Linked parent</th><th style="text-align:left;padding:12px;">Linked children in your classes</th><th style="text-align:left;padding:12px;">Communication</th><th style="text-align:left;padding:12px;">Action</th></tr></thead>
+                    <tbody>
+                    <tr th:each="entry : ${directory.entries}">
+                        <td style="padding:12px;"><strong th:text="${entry.studentName}">Student</strong></td>
+                        <td style="padding:12px;" th:text="${entry.grade + ' / ' + entry.section}">1 / A</td>
+                        <td style="padding:12px;"><strong th:text="${entry.parentName}">Parent</strong><br><span class="page-subtitle" th:text="${entry.parentEmail}">parent@example.test</span></td>
+                        <td style="padding:12px;" th:text="${entry.linkedChildCount}">1</td>
+                        <td style="padding:12px;" th:text="${entry.conversationStarted ? 'Conversation exists' : 'Not started'}">Not started</td>
+                        <td style="padding:12px;">
+                            <form method="post" th:action="@{/teacher/parents/conversations/open}">
+                                <input type="hidden" name="studentId" th:value="${entry.studentId}">
+                                <input type="hidden" name="parentId" th:value="${entry.parentId}">
+                                <button class="btn btn-primary" type="submit">Open conversation</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(directory.entries)}"><td colspan="6" style="padding:18px;">No linked parents found for your assigned classes.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div></body></html>

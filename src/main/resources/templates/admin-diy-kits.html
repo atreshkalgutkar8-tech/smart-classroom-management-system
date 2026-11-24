@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DIY Kit Catalogue | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('ADMIN')}"></aside>
+    <main class="main-content role-ui admin-ui">
+        <header th:replace="~{fragments/topbar :: topbar('DIY Kit Catalogue', 'Maintain physical learning kit details and contents')}"></header>
+        <div class="page-content">
+            <div class="page-heading"><h2>Physical DIY Kits</h2><p>Record kit details and the items included in each kit.</p></div>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            <section class="card">
+                <h3>Add a kit to the catalogue</h3>
+                <form th:action="@{/admin/kits/create}" method="post" class="session-form">
+                    <div class="form-group full-width"><label for="name">Kit name</label><input id="name" name="name" maxlength="180" required></div>
+                    <div class="form-group full-width"><label for="description">Kit details</label><textarea id="description" name="description" rows="3" maxlength="10000" required></textarea></div>
+                    <div class="form-group full-width"><label for="items">Items included (one item per line)</label><textarea id="items" name="items" rows="5" maxlength="10000" required></textarea></div>
+                    <div class="full-width"><button class="btn btn-primary" type="submit">Add Kit</button></div>
+                </form>
+            </section>
+            <section style="margin-top:24px;">
+                <div class="page-heading"><h2>Catalogue</h2></div>
+                <div class="stats-grid" th:if="${!#lists.isEmpty(kits)}">
+                    <article class="card" th:each="kit : ${kits}">
+                        <h3 th:text="${kit.name}">Kit name</h3>
+                        <p style="white-space:pre-wrap" th:text="${kit.description}">Description</p>
+                        <h4>Items in this kit</h4>
+                        <ul><li th:each="item : ${kit.items}" th:text="${item}">Kit item</li></ul>
+                    </article>
+                </div>
+                <div class="empty-state" th:if="${#lists.isEmpty(kits)}"><h3>No kits in the catalogue</h3><p>Add a kit and its item list above.</p></div>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

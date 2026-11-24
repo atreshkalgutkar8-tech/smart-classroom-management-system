@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Activity Instructions | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></aside>
+    <main class="main-content student-page student-activity-detail-page">
+        <header th:replace="~{fragments/topbar :: topbar('Activity Instructions', 'Follow each step and enjoy learning')}"></header>
+        <div class="page-content">
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <section class="card student-activity-detail-card">
+                <p class="status-badge" th:text="${'Grade ' + item.activity.grade + ' · ' + item.activity.subject + ' · ' + item.activity.topic}">Grade · Subject · Topic</p>
+                <h2 th:text="${item.activity.title}">Activity</h2>
+                <p><strong>What you will learn:</strong> <span th:text="${item.activity.learningObjective}">Objective</span></p>
+                <h3>Materials to gather</h3><p style="white-space:pre-wrap" th:text="${item.activity.requiredMaterials}">Materials</p>
+                <h3>Steps</h3><div style="white-space:pre-wrap" th:text="${item.activity.instructions}">Instructions</div>
+                <p th:if="${item.completed}" class="status-badge status-completed">
+                    Completed <span th:if="${item.completedAt != null}" th:text="${#temporals.format(item.completedAt, 'dd MMM yyyy, hh:mm a')}">date</span>
+                </p>
+                <form th:if="${!item.completed}" th:action="@{/student/activities/{id}/complete(id=${item.activity.id})}" method="post" class="student-detail-actions">
+                    <button type="submit" class="btn btn-primary">I Completed This Activity</button>
+                </form>
+                <a class="btn btn-secondary" th:href="@{/student/activities}" >Back to Activities</a>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

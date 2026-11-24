@@ -1,0 +1,157 @@
+﻿
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Teacher Dashboard | Smart Classroom</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- Reusable Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+
+    <!-- Main Dashboard Content -->
+    <main class="main-content role-ui teacher-ui">
+
+        <!-- Reusable Topbar -->
+        <div th:replace="~{fragments/topbar :: topbar('Teacher Dashboard', 'Manage your classroom and support your students learning.')}"></div>
+
+        <!-- Welcome Section -->
+        <section class="card" style="margin-bottom: 28px;">
+
+            <h2 style="font-size: 21px; margin-bottom: 10px;">
+                Welcome to Smart Classroom!
+            </h2>
+
+            <p class="page-subtitle">
+                Manage lessons, conduct educational activities,
+                and support your students' learning.
+            </p>
+
+        </section>
+
+        <!-- Classroom Activities -->
+        <section>
+
+            <h2 class="section-title">Classroom Activities</h2>
+
+            <div class="stats-grid">
+
+                <!-- Classroom Sessions -->
+                <div class="card">
+
+                    <div style="font-size: 26px; margin-bottom: 15px;">
+                        📚
+                    </div>
+
+                    <h3 style="margin-bottom: 10px;">
+                        Classroom Sessions
+                    </h3>
+
+                    <p class="page-subtitle">
+                        Create lessons, select a grade and subject,
+                        and start or complete classroom sessions.
+                    </p>
+
+                    <a class="btn btn-primary"
+                       th:href="@{/teacher/sessions}"
+                       style="margin-top: 18px;">
+                        Manage Sessions
+                    </a>
+
+                </div>
+
+                <!-- Educational Games -->
+                <div class="card">
+
+                    <div style="font-size: 26px; margin-bottom: 15px;">
+                        🎮
+                    </div>
+
+                    <h3 style="margin-bottom: 10px;">
+                        Educational Games
+                    </h3>
+
+                    <p class="page-subtitle">
+                        Explore learning games and support
+                        interactive classroom practice.
+                    </p>
+
+                    <a class="btn btn-primary"
+                       th:href="@{/teacher/games}"
+                       style="margin-top: 18px;">
+                        View Games
+                    </a>
+
+                </div>
+
+                <!-- DIY Activities -->
+                <div class="card">
+
+                    <div style="font-size: 26px; margin-bottom: 15px;">
+                        🎨
+                    </div>
+
+                    <h3 style="margin-bottom: 10px;">
+                        DIY Activities
+                    </h3>
+
+                    <p class="page-subtitle">
+                        Organize hands-on activities and view
+                        materials and instructions.
+                    </p>
+
+                    <a class="btn btn-primary"
+                       th:href="@{/teacher/activities}"
+                       style="margin-top: 18px;">
+                        View DIY Activities
+                    </a>
+
+                </div>
+                
+
+                <!-- Student Participation -->
+                <div class="card">
+
+                    <div style="font-size: 26px; margin-bottom: 15px;">
+                        📊
+                    </div>
+
+                    <h3 style="margin-bottom: 10px;">
+                        Session Participation
+                    </h3>
+
+                    <p class="page-subtitle">
+                        Choose a session and open Participants to view or record
+                        the students who participated.
+                    </p>
+
+                    <a class="btn btn-primary"
+                       th:href="@{/teacher/sessions}"
+                       style="margin-top: 18px;">
+                        Open Session List
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

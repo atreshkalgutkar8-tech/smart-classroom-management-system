@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Play Game | Smart Classroom</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></div>
+
+    <main class="main-content student-page student-gameplay-page">
+
+        <div th:replace="~{fragments/topbar :: topbar('Play Game', 'Complete your learning activity')}"></div>
+
+        <section class="dashboard-content">
+
+            <div class="page-header">
+                <h1 th:text="${game.title}">Game Title</h1>
+                <p th:text="${game.description}">Game description</p>
+            </div>
+
+            <div class="dashboard-card">
+
+                <h2>Game Information</h2>
+
+                <p>
+                    Subject:
+                    <strong th:text="${game.subject}">Mathematics</strong>
+                </p>
+
+                <p>
+                    Grade:
+                    <strong th:text="${game.grade}">1</strong>
+                </p>
+
+                <p>
+                    Attempt:
+                    <strong th:text="${attempt.attemptNumber}">1</strong>
+                </p>
+
+                <p>
+                    Total Questions:
+                    <strong th:text="${attempt.totalQuestions}">0</strong>
+                </p>
+
+            </div>
+
+            <div th:if="${successMessage}" class="alert alert-success"
+                 th:text="${successMessage}"></div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger"
+                 th:text="${errorMessage}"></div>
+
+            <!-- Quiz Questions -->
+            <div th:if="${game.gameType.name() == 'QUIZ'}">
+
+                <div th:each="question, stat : ${questions}"
+                     class="dashboard-card">
+
+                    <h3>
+                        Question
+                        <span th:text="${stat.count}">1</span>
+                    </h3>
+
+                    <p th:text="${question.questionText}">
+                        Question text
+                    </p>
+
+                    <form method="post"
+                          th:action="@{/student/games/{assignmentId}/attempts/{attemptId}/answer(
+                            assignmentId=${assignment.id},
+                            attemptId=${attempt.id})}">
+
+                        <input type="hidden"
+                               name="questionId"
+                               th:value="${question.id}">
+
+                        <div class="form-group">
+
+                            <label>
+                                <input type="radio"
+                                       name="studentAnswer"
+                                       th:value="${question.optionA}"
+                                       th:checked="${question.savedAnswer == question.optionA}"
+                                       required>
+                                <span th:text="${question.optionA}">Option A</span>
+                            </label>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>
+                                <input type="radio"
+                                       name="studentAnswer"
+                                       th:value="${question.optionB}"
+                                       th:checked="${question.savedAnswer == question.optionB}"
+                                       required>
+                                <span th:text="${question.optionB}">Option B</span>
+                            </label>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>
+                                <input type="radio"
+                                       name="studentAnswer"
+                                       th:value="${question.optionC}"
+                                       th:checked="${question.savedAnswer == question.optionC}"
+                                       required>
+                                <span th:text="${question.optionC}">Option C</span>
+                            </label>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>
+                                <input type="radio"
+                                       name="studentAnswer"
+                                       th:value="${question.optionD}"
+                                       th:checked="${question.savedAnswer == question.optionD}"
+                                       required>
+                                <span th:text="${question.optionD}">Option D</span>
+                            </label>
+
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Save Answer
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <!-- Matching game -->
+            <section th:if="${game.gameType.name() == 'MATCHING'}"
+                     class="matching-game">
+
+                <div class="matching-progress">
+                    Match every item on the left with one item on the right.
+                    <strong th:text="${#lists.size(questions) + ' pairs'}">4 pairs</strong>
+                </div>
+
+                <div class="dashboard-card matching-question">
+                    <div class="matching-columns">
+                        <div class="matching-side">
+                            <h3>Choose a left-side item</h3>
+                            <button th:each="item : ${questions}"
+                                    type="button"
+                                    class="matching-item"
+                                    th:classappend="${item.savedEvaluated and item.savedCorrect} ? ' matching-item-complete' : (${item.savedEvaluated} ? ' matching-item-incorrect' : '')"
+                                    th:attr="data-question-id=${item.id}, aria-pressed='false'">
+                                <img th:if="${item.leftImageUrl != null and !#strings.isEmpty(item.leftImageUrl)}"
+                                     th:src="${item.leftImageUrl}"
+                                     th:alt="${item.leftItem}"
+                                     class="matching-image">
+                                <span th:if="${item.leftImageUrl == null or #strings.isEmpty(item.leftImageUrl)}"
+                                      th:text="${item.leftItem}">Left item</span>
+                                <span th:if="${item.savedEvaluated and item.savedCorrect}"
+                                      class="matching-check" aria-label="Correct">✓</span>
+                                <span th:if="${item.savedEvaluated and !item.savedCorrect}"
+                                      class="matching-cross" aria-label="Incorrect">×</span>
+                            </button>
+                        </div>
+
+                        <div class="matching-side">
+                            <h3>Choose its match</h3>
+                            <button th:each="option : ${matchingOptions}"
+                                    type="button"
+                                    class="matching-choice"
+                                    th:text="${option}"
+                                    th:attr="data-right-item=${option}, aria-pressed='false'">
+                                Right item
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="matchingBoardForm"
+                          method="post"
+                          th:action="@{/student/games/{assignmentId}/attempts/{attemptId}/matching-submit(assignmentId=${assignment.id},attemptId=${attempt.id})}"
+                          th:attr="data-draft-url=@{/student/games/{assignmentId}/attempts/{attemptId}/matching-progress(assignmentId=${assignment.id},attemptId=${attempt.id})}">
+                        <th:block th:each="item : ${questions}">
+                            <input type="hidden" name="questionIds" th:value="${item.id}">
+                            <input type="hidden" name="rightItems" th:value="${item.savedAnswer}"
+                                   th:attr="data-answer-for=${item.id}">
+                        </th:block>
+                        <p id="matchingStatus" class="matching-feedback" role="status">
+                            Select a left item, then choose its match.
+                        </p>
+                        <button id="submitMatchingAnswers" type="submit" class="btn btn-primary" disabled>
+                            Submit Answers
+                        </button>
+                    </form>
+
+                    <div id="matchingResult" th:if="${matchingQuestionsAnswered}"
+                         class="matching-result"
+                         th:classappend="${attempt.score == attempt.totalQuestions} ? ' matching-feedback-correct' : ' matching-feedback-retry'">
+                        <p>Board score:
+                            <strong th:text="${attempt.score + ' / ' + attempt.totalQuestions}">0 / 0</strong>
+                        </p>
+                        <p>Review the matches above, then finish this attempt to open your result.</p>
+                    </div>
+
+                    <p th:if="${!matchingQuestionsAnswered}" class="matching-completion-hint">
+                        Your selections save as you work. Match every item, then submit the board to see your score.
+                    </p>
+
+                    <form th:if="${matchingQuestionsAnswered}"
+                          method="post"
+                          th:action="@{/student/games/{assignmentId}/attempts/{attemptId}/complete(assignmentId=${assignment.id},attemptId=${attempt.id})}"
+                          class="matching-finish-form">
+                        <button type="submit" class="btn btn-primary">Finish Attempt</button>
+                    </form>
+                </div>
+            </section>
+
+            <section th:if="${game.gameType.name() == 'PUZZLE'}"
+                     class="puzzle-game">
+                <div th:each="question, stat : ${questions}" class="dashboard-card puzzle-question">
+                    <h2 th:text="${'Puzzle ' + stat.count + ' of ' + #lists.size(questions)}">Puzzle 1</h2>
+                    <p th:if="${question.puzzleTechnique != null}" class="page-subtitle"
+                       th:text="${#strings.replace(question.puzzleTechnique.name(), '_', ' ')}">Puzzle technique</p>
+                    <p class="puzzle-prompt" th:text="${question.questionText}">Puzzle prompt</p>
+                    <form method="post"
+                          th:action="@{/student/games/{assignmentId}/attempts/{attemptId}/answer(assignmentId=${assignment.id},attemptId=${attempt.id})}"
+                          class="puzzle-answer-form">
+                        <input type="hidden" name="questionId" th:value="${question.id}">
+                        <div class="form-group">
+                            <label class="form-label">Your answer</label>
+                            <input type="hidden" name="studentAnswer" class="puzzle-submission"
+                                   th:value="${question.savedAnswer}" th:attr="data-technique=${question.puzzleTechnique}">
+                            <div th:if="${question.puzzleTechnique.name() == 'NUMBER_SEQUENCE' or question.puzzleTechnique.name() == 'ALPHABET_SEQUENCE'}"
+                                 class="puzzle-sequence" th:attr="data-saved=${question.savedAnswer}">
+                                <p>Tap a tile, then tap an answer slot.</p>
+                                <div class="puzzle-tiles"><button type="button" class="puzzle-tile" th:each="tile : ${question.puzzleTiles}"
+                                     th:text="${tile.value}" th:attr="data-tile-index=${tile.index}">5</button></div>
+                                <div class="puzzle-slots"><button type="button" class="puzzle-slot" th:each="tile,slot : ${question.puzzleTiles}"
+                                     th:attr="data-slot-index=${slot.index}">_</button></div>
+                            </div>
+                            <div th:if="${question.puzzleTechnique.name() == 'MISSING_NUMBER' or question.puzzleTechnique.name() == 'MISSING_ALPHABET'}"
+                                 class="puzzle-pattern">
+                                <span class="puzzle-pattern-token" th:each="token,stat : ${question.puzzlePattern}">
+                                    <span th:if="${token != '__'}" th:text="${token}">2</span>
+                                    <input th:if="${token == '__'}" class="form-control puzzle-blank"
+                                           th:attr="maxlength=${game.puzzleTemplate.name() == 'NUMBER' ? 10 : 1}, inputmode=${game.puzzleTemplate.name() == 'NUMBER' ? 'numeric' : 'text'}"
+                                           aria-label="Missing value">
+                                    <span th:if="${!stat.last}">, </span>
+                                </span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Check and Save Answer</button>
+                        <span th:if="${question.savedEvaluated and question.savedCorrect}" class="page-subtitle">Correct answer saved.</span>
+                        <span th:if="${question.savedEvaluated and !question.savedCorrect}" class="page-subtitle">Answer saved. You can change it before finishing.</span>
+                    </form>
+                </div>
+                <p th:if="${!puzzleQuestionsAnswered}" class="puzzle-completion-hint">
+                    Save an answer for each puzzle before finishing the attempt. You can update any answer while the attempt is open.
+                </p>
+            </section>
+
+            <!-- Complete Game -->
+            <div class="dashboard-card"
+                 th:if="${game.gameType.name() != 'MATCHING' and (game.gameType.name() != 'PUZZLE' or puzzleQuestionsAnswered)}">
+
+                <h2>Finish Game</h2>
+
+                <p>
+                    Make sure you have saved your answers before completing
+                    the game.
+                </p>
+
+                <form method="post"
+                      th:action="@{/student/games/{assignmentId}/attempts/{attemptId}/complete(
+                        assignmentId=${assignment.id},
+                        attemptId=${attempt.id})}">
+
+                    <button type="submit" class="btn btn-primary">
+                        Submit Game
+                    </button>
+
+                </form>
+
+            </div>
+
+            <p class="dashboard-card" th:if="${game.gameType.name() == 'PUZZLE' and !puzzleQuestionsAnswered}">
+                Save an answer for every puzzle question before completing this attempt.
+            </p>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+    (() => {
+        const form = document.getElementById('matchingBoardForm');
+        if (!form) return;
+
+        const leftButtons = [...document.querySelectorAll('.matching-item[data-question-id]')];
+        const rightButtons = [...document.querySelectorAll('.matching-choice[data-right-item]')];
+        const answers = [...form.querySelectorAll('input[name="rightItems"]')];
+        const status = document.getElementById('matchingStatus');
+        const submitButton = document.getElementById('submitMatchingAnswers');
+        const result = document.getElementById('matchingResult');
+        let activeQuestionId = null;
+        let saveQueue = Promise.resolve();
+
+        function selectedValues() {
+            return answers.map(input => input.value.trim());
+        }
+
+        function refreshBoard() {
+            const selected = selectedValues();
+            const assignmentByRight = new Map();
+            answers.forEach(input => {
+                if (input.value.trim()) assignmentByRight.set(input.value.trim().toLocaleLowerCase(), input.dataset.answerFor);
+            });
+
+            leftButtons.forEach(button => {
+                const questionId = button.dataset.questionId;
+                button.classList.toggle('matching-item-selected', questionId === activeQuestionId);
+                button.classList.toggle('matching-item-has-selection', Boolean(
+                    answers.find(input => input.dataset.answerFor === questionId)?.value.trim()
+                ));
+                button.setAttribute('aria-pressed', String(questionId === activeQuestionId));
+            });
+
+            rightButtons.forEach(button => {
+                const rightItem = button.dataset.rightItem;
+                const assignedTo = assignmentByRight.get(rightItem.trim().toLocaleLowerCase());
+                const isSelectedForActive = assignedTo === activeQuestionId;
+                button.classList.toggle('matching-choice-selected', isSelectedForActive);
+                button.classList.toggle('matching-choice-assigned', Boolean(assignedTo));
+                button.disabled = activeQuestionId === null
+                        || (Boolean(assignedTo) && !isSelectedForActive);
+                button.setAttribute('aria-pressed', String(isSelectedForActive));
+            });
+
+            const complete = selected.length > 0
+                    && selected.every(Boolean)
+                    && new Set(selected.map(value => value.toLocaleLowerCase())).size === selected.length;
+            submitButton.disabled = !complete;
+        }
+
+        function queueDraftSave() {
+            status.textContent = 'Saving your selections…';
+            status.className = 'matching-feedback matching-feedback-saving';
+            const body = new URLSearchParams();
+            new FormData(form).forEach((value, key) => body.append(key, value));
+            saveQueue = saveQueue.catch(() => {}).then(async () => {
+                const response = await fetch(form.dataset.draftUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                    body
+                });
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message || 'Could not save your selections.');
+                }
+            });
+            saveQueue.then(() => {
+                status.textContent = 'Progress saved. Keep matching or submit when ready.';
+                status.className = 'matching-feedback matching-feedback-saving';
+            }).catch(error => {
+                status.textContent = error.message;
+                status.className = 'matching-feedback matching-feedback-retry';
+            });
+        }
+
+        leftButtons.forEach(button => button.addEventListener('click', () => {
+            activeQuestionId = button.dataset.questionId;
+            status.textContent = 'Now choose one unused item from the right column.';
+            status.className = 'matching-feedback matching-feedback-saving';
+            refreshBoard();
+        }));
+
+        rightButtons.forEach(button => button.addEventListener('click', () => {
+            if (activeQuestionId === null) return;
+            const input = answers.find(field => field.dataset.answerFor === activeQuestionId);
+            if (!input) return;
+            input.value = input.value === button.dataset.rightItem ? '' : button.dataset.rightItem;
+            if (result) result.hidden = true;
+            leftButtons.forEach(left => {
+                left.classList.remove('matching-item-complete', 'matching-item-incorrect');
+                left.querySelector('.matching-check, .matching-cross')?.remove();
+            });
+            status.textContent = 'Selection updated.';
+            refreshBoard();
+            queueDraftSave();
+        }));
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            refreshBoard();
+            if (submitButton.disabled) {
+                status.textContent = 'Match every item once before submitting.';
+                status.className = 'matching-feedback matching-feedback-retry';
+                return;
+            }
+            status.textContent = 'Checking your matches…';
+            saveQueue.catch(() => {}).then(() => HTMLFormElement.prototype.submit.call(form))
+                    .catch(error => {
+                        status.textContent = error.message;
+                        status.className = 'matching-feedback matching-feedback-retry';
+                    });
+        });
+
+        refreshBoard();
+    })();
+</script>
+<script>
+(() => {
+  document.querySelectorAll('.puzzle-answer-form').forEach(form => {
+    const submission = form.querySelector('.puzzle-submission');
+    const sequence = form.querySelector('.puzzle-sequence');
+    if (sequence) {
+      const slots = [...sequence.querySelectorAll('.puzzle-slot')];
+      const tiles = [...sequence.querySelectorAll('.puzzle-tile')];
+      let selected = null;
+      const saved = (sequence.dataset.saved || '').split(',');
+      saved.forEach((tileIndex, i) => { if (slots[i] && tileIndex !== '') slots[i].dataset.tileIndex = tileIndex; });
+      const draw = () => {
+        const used = new Set(slots.map(s => s.dataset.tileIndex).filter(x => x !== undefined));
+        slots.forEach(s => { s.textContent = s.dataset.tileIndex === undefined ? '_' : tiles.find(t => t.dataset.tileIndex === s.dataset.tileIndex)?.textContent || '_'; });
+        tiles.forEach(t => { t.disabled = used.has(t.dataset.tileIndex); t.classList.toggle('puzzle-tile-selected', t.dataset.tileIndex === selected); });
+        submission.value = slots.map(s => s.dataset.tileIndex ?? '').join(',');
+      };
+      tiles.forEach(t => t.addEventListener('click', () => { selected = t.dataset.tileIndex; draw(); }));
+      slots.forEach(s => s.addEventListener('click', () => {
+        if (selected !== null) { s.dataset.tileIndex = selected; selected = null; }
+        else delete s.dataset.tileIndex;
+        draw();
+      }));
+      form.addEventListener('submit', () => { submission.value = slots.map(s => s.dataset.tileIndex ?? '').join(','); });
+      draw();
+    }
+    const blanks = [...form.querySelectorAll('.puzzle-blank')];
+    if (blanks.length) {
+      const saved = (submission.value || '').split(',');
+      blanks.forEach((input, i) => input.value = saved[i] || '');
+      const sync = () => submission.value = blanks.map(input => input.value.trim()).join(',');
+      blanks.forEach(input => input.addEventListener('input', sync));
+      form.addEventListener('submit', sync);
+    }
+  });
+})();
+</script>
+<script th:src="@{/js/theme.js}"></script>
+
+</body>
+</html>

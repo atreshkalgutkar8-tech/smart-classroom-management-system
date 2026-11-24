@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DIY Activities | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></aside>
+    <main class="main-content role-ui teacher-ui">
+        <header th:replace="~{fragments/topbar :: topbar('DIY Activities', 'Create and browse classroom activities')}"></header>
+        <div class="page-content">
+            <div class="page-heading"><h2>DIY Activity Catalogue</h2><p>Activities are organized by grade, subject and topic.</p></div>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            <section class="card">
+                <h3>Create DIY Activity</h3>
+                <form th:action="@{/teacher/activities/create}" method="post" class="session-form">
+                    <div class="form-group full-width"><label for="title">Activity title</label><input id="title" name="title" maxlength="180" required></div>
+                    <div class="form-group"><label for="grade">Grade</label><select id="grade" name="grade" required><option value="">Select grade</option><option th:each="grade : ${#numbers.sequence(1,5)}" th:value="${grade}" th:text="${'Grade ' + grade}"></option></select></div>
+                    <div class="form-group"><label for="subject">Subject</label><select id="subject" name="subject" required><option value="">Select subject</option><option>Mathematics</option><option>Kannada</option><option>English</option><option>EVS</option></select></div>
+                    <div class="form-group full-width"><label for="topic">Topic</label><input id="topic" name="topic" maxlength="180" required></div>
+                    <div class="form-group full-width"><label for="learningObjective">Learning objective</label><textarea id="learningObjective" name="learningObjective" maxlength="1000" rows="2" required></textarea></div>
+                    <div class="form-group full-width"><label for="requiredMaterials">Required materials</label><textarea id="requiredMaterials" name="requiredMaterials" maxlength="10000" rows="3" required></textarea></div>
+                    <div class="form-group full-width"><label for="instructions">Step-by-step instructions</label><textarea id="instructions" name="instructions" maxlength="20000" rows="6" required></textarea></div>
+                    <div class="full-width"><button type="submit" class="btn btn-primary">Create Activity</button></div>
+                </form>
+            </section>
+
+            <section style="margin-top:24px;">
+                <div class="page-heading"><h2>Activities</h2><p>Browse activities across grades and subjects.</p></div>
+                <div class="stats-grid" th:if="${!#lists.isEmpty(activities)}">
+                    <article class="card" th:each="activity : ${activities}">
+                        <p class="status-badge" th:text="${'Grade ' + activity.grade + ' · ' + activity.subject}">Grade · Subject</p>
+                        <h3 th:text="${activity.title}">Activity title</h3>
+                        <p><strong>Topic:</strong> <span th:text="${activity.topic}">Topic</span></p>
+                        <p th:text="${activity.learningObjective}">Learning objective</p>
+                        <p class="page-subtitle" th:text="${'Created by ' + activity.createdBy}">Teacher</p>
+                        <a class="btn btn-secondary" th:href="@{/teacher/activities/{id}(id=${activity.id})}">View Instructions</a>
+                    </article>
+                </div>
+                <div class="empty-state" th:if="${#lists.isEmpty(activities)}"><h3>No activities yet</h3><p>Create an activity to begin the catalogue.</p></div>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Student Performance', 'Review current game assignments and recorded learning activity')}"></div>
+        <section class="dashboard-content">
+            <p style="margin-bottom:20px;"><a class="btn btn-secondary" th:href="@{/teacher/students}">Back to Students</a></p>
+            <header class="page-header">
+                <h1 th:text="${detail.student.fullName}">Student name</h1>
+                <form method="post" th:action="@{/teacher/students/communication/open}" style="margin-top:14px;">
+                    <input type="hidden" name="studentId" th:value="${detail.student.id}">
+                    <button class="btn btn-primary" type="submit">Message Student</button>
+                </form>
+                <p>Grade <span th:text="${detail.student.grade}">1</span>, Section <span th:text="${detail.student.section}">A</span>
+                    <span th:text="${' · ' + detail.student.email}"> · student email</span></p>
+            </header>
+
+            <section class="card" style="margin-bottom:24px;">
+                <h2 class="section-title">Linked Parents</h2>
+                <p th:if="${#lists.isEmpty(detail.student.parents)}">No parent is linked to this student yet.</p>
+                <div th:each="parent : ${detail.student.parents}" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:10px 0;">
+                    <span><strong th:text="${parent.fullName}">Parent name</strong>
+                        <span class="page-subtitle" th:text="${parent.email}">parent@example.test</span></span>
+                    <form method="post" th:action="@{/teacher/parents/conversations/open}">
+                        <input type="hidden" name="studentId" th:value="${detail.student.id}">
+                        <input type="hidden" name="parentId" th:value="${parent.id}">
+                        <button class="btn btn-primary" type="submit">Contact Parent</button>
+                    </form>
+                </div>
+            </section>
+
+            <h2 class="section-title">Student Overview</h2>
+            <div class="stats-grid">
+                <article class="card"><h3>Currently assigned games</h3><p class="page-subtitle" th:text="${detail.student.totalAssignedGames}">0</p></article>
+                <article class="card"><h3>Completed games</h3><p class="page-subtitle" th:text="${detail.student.completedGames}">0</p></article>
+                <article class="card"><h3>Pending games</h3><p class="page-subtitle" th:text="${detail.student.pendingGames}">0</p></article>
+                <article class="card"><h3>Total attempts</h3><p class="page-subtitle" th:text="${detail.student.totalAttempts}">0</p></article>
+                <article class="card">
+                    <h3>Best completed score</h3>
+                    <p class="page-subtitle" th:if="${detail.student.bestScorePercentage != null}" th:text="${#numbers.formatDecimal(detail.student.bestScorePercentage,1,1) + '%'}">0%</p>
+                    <p class="page-subtitle" th:if="${detail.student.bestScorePercentage == null}">No activity yet</p>
+                </article>
+            </div>
+            <p class="page-subtitle" style="margin:12px 0 26px;">Completed games are distinct current assignments with at least one completed attempt. Scores use completed attempts only.</p>
+
+            <h2 class="section-title">Subject-wise Performance</h2>
+            <div class="card" style="overflow-x:auto;margin-bottom:26px;">
+                <table style="width:100%;border-collapse:collapse;min-width:600px;">
+                    <thead><tr><th style="text-align:left;padding:12px;">Subject</th><th style="text-align:left;padding:12px;">Assigned</th><th style="text-align:left;padding:12px;">Completed</th><th style="text-align:left;padding:12px;">Best</th><th style="text-align:left;padding:12px;">Average completed score</th></tr></thead>
+                    <tbody>
+                    <tr th:each="subject : ${detail.subjects}">
+                        <td style="padding:12px;" th:text="${subject.subject}">Mathematics</td>
+                        <td style="padding:12px;" th:text="${subject.assignedGames}">0</td>
+                        <td style="padding:12px;" th:text="${subject.completedGames}">0</td>
+                        <td style="padding:12px;">
+                            <span th:if="${subject.bestScorePercentage != null}" th:text="${#numbers.formatDecimal(subject.bestScorePercentage,1,1) + '%'}">0%</span>
+                            <span th:if="${subject.bestScorePercentage == null}">No activity yet</span>
+                        </td>
+                        <td style="padding:12px;">
+                            <span th:if="${subject.averageScorePercentage != null}" th:text="${#numbers.formatDecimal(subject.averageScorePercentage,1,1) + '%'}">0%</span>
+                            <span th:if="${subject.averageScorePercentage == null}">No activity yet</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="section-title">Game Performance</h2>
+            <div class="card" style="overflow-x:auto;margin-bottom:26px;">
+                <table style="width:100%;border-collapse:collapse;min-width:760px;">
+                    <thead><tr><th style="text-align:left;padding:12px;">Game</th><th style="text-align:left;padding:12px;">Type</th><th style="text-align:left;padding:12px;">Subject</th><th style="text-align:left;padding:12px;">Best score</th><th style="text-align:left;padding:12px;">Attempts</th><th style="text-align:left;padding:12px;">Status</th><th style="text-align:left;padding:12px;">Time for best attempt</th></tr></thead>
+                    <tbody>
+                    <tr th:each="game : ${detail.games}">
+                        <td style="padding:12px;" th:text="${game.title}">Game</td>
+                        <td style="padding:12px;" th:text="${game.gameType}">QUIZ</td>
+                        <td style="padding:12px;" th:text="${game.subject}">English</td>
+                        <td style="padding:12px;">
+                            <span th:if="${game.bestScorePercentage != null}" th:text="${#numbers.formatDecimal(game.bestScorePercentage,1,1) + '%'}">0%</span>
+                            <span th:if="${game.bestScorePercentage == null}">No completed score</span>
+                        </td>
+                        <td style="padding:12px;" th:text="${game.attempts}">0</td>
+                        <td style="padding:12px;" th:text="${game.completed ? 'Completed' : 'Pending'}">Pending</td>
+                        <td style="padding:12px;" th:text="${game.bestTimeSeconds == null ? '—' : game.bestTimeSeconds + ' sec'}">—</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(detail.games)}"><td colspan="7" style="padding:16px;">No activity yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="section-title">Homework and Home Learning</h2>
+            <article class="card" style="margin-bottom:26px;">
+                <p>No homework or home-learning records are available in the current application.</p>
+            </article>
+
+            <h2 class="section-title">Classroom Session History</h2>
+            <article class="card" style="margin-bottom:26px;">
+                <p class="page-subtitle">These are sessions created by you for this grade. Open a session's Participants page to view its recorded participants.</p>
+                <div th:each="classroomSession : ${detail.gradeSessions}" style="padding:12px 0;border-bottom:1px solid var(--border);">
+                    <strong th:text="${classroomSession.title}">Lesson</strong>
+                    <span th:text="${' · ' + classroomSession.subject + ' · ' + classroomSession.topic + ' · ' + classroomSession.status}">Session</span>
+                    <span class="page-subtitle" th:text="${' · ' + #temporals.format(classroomSession.createdAt,'dd MMM yyyy')}">date</span>
+                </div>
+                <p th:if="${#lists.isEmpty(detail.gradeSessions)}">No classroom sessions recorded for this grade.</p>
+            </article>
+
+            <h2 class="section-title">Performance History</h2>
+            <div class="card" style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:640px;">
+                    <thead><tr><th style="text-align:left;padding:12px;">Date</th><th style="text-align:left;padding:12px;">Activity</th><th style="text-align:left;padding:12px;">Subject</th><th style="text-align:left;padding:12px;">Type</th><th style="text-align:left;padding:12px;">Status</th><th style="text-align:left;padding:12px;">Score</th><th style="text-align:left;padding:12px;">Time</th></tr></thead>
+                    <tbody>
+                    <tr th:each="event : ${detail.history}">
+                        <td style="padding:12px;" th:text="${#temporals.format(event.date,'dd MMM yyyy, hh:mm a')}">Date</td>
+                        <td style="padding:12px;" th:text="${event.title}">Game</td>
+                        <td style="padding:12px;" th:text="${event.subject}">Mathematics</td>
+                        <td style="padding:12px;" th:text="${event.activityType}">QUIZ</td>
+                        <td style="padding:12px;" th:text="${event.status}">Completed</td>
+                        <td style="padding:12px;">
+                            <span th:if="${event.scorePercentage != null}" th:text="${#numbers.formatDecimal(event.scorePercentage,1,1) + '%'}">0%</span>
+                            <span th:if="${event.scorePercentage == null}">In progress</span>
+                        </td>
+                        <td style="padding:12px;" th:text="${event.timeTakenSeconds == null ? '—' : event.timeTakenSeconds + ' sec'}">—</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(detail.history)}"><td colspan="7" style="padding:16px;">No activity yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

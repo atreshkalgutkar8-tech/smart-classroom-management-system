@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Game | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></aside>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Manage Game', 'Edit your game and its questions')}"></div>
+        <p style="margin-bottom:20px;"><a class="btn btn-secondary" th:href="@{/teacher/games}">Back to Educational Games</a></p>
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <section class="card" style="margin-bottom:28px;">
+            <h2 class="section-title" th:text="${game.title}">Game title</h2>
+            <p>Game type: <strong th:text="${game.gameType}"></strong>
+                <span th:if="${game.puzzleTemplate != null}"> · Puzzle template: <strong th:text="${game.puzzleTemplate}"></strong></span>
+                <span th:if="${game.matchingFormat != null}"> · Format: <strong th:text="${game.matchingFormat}"></strong></span>
+            </p>
+            <form style="margin-top:20px;" th:action="@{/teacher/games/{id}/update(id=${game.id})}" method="post">
+                <div class="stats-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                    <div class="form-group">
+                        <label class="form-label" for="title">Title</label>
+                        <input class="form-control" id="title" name="title" maxlength="150" th:value="${game.title}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="gameType">Game Type</label>
+                        <select class="form-control" id="gameType" name="gameType" required>
+                            <option th:each="type : ${gameTypes}" th:value="${type}" th:text="${type}" th:selected="${type == game.gameType}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="subject">Subject</label>
+                        <select class="form-control" id="subject" name="subject" required>
+                            <option th:each="subject : ${subjects}" th:value="${subject}" th:text="${subject}" th:selected="${subject == game.subject}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="grade">Grade</label>
+                        <select class="form-control" id="grade" name="grade" required>
+                            <option th:each="grade : ${#numbers.sequence(1,5)}" th:value="${grade}" th:text="${grade}" th:selected="${grade == game.grade}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="visibility">Visibility</label>
+                        <select class="form-control" id="visibility" name="visibility" required>
+                            <option th:each="value : ${visibilities}" th:value="${value}" th:text="${value}" th:selected="${value == game.visibility}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="puzzleTemplate">Puzzle Template (for Puzzle)</label>
+                        <select class="form-control" id="puzzleTemplate" name="puzzleTemplate">
+                            <option value="">Not a puzzle</option>
+                            <option th:each="template : ${puzzleTemplates}" th:value="${template}" th:text="${template}" th:selected="${template == game.puzzleTemplate}"></option>
+                            <option th:if="${legacyPuzzleTemplate != null}" th:value="${legacyPuzzleTemplate}"
+                                    th:text="${legacyPuzzleTemplate + ' (legacy)'}" selected></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="matchingFormat">Matching Format (for Matching)</label>
+                        <select class="form-control" id="matchingFormat" name="matchingFormat">
+                            <option value="">Not matching</option>
+                            <option th:each="format : ${matchingFormats}" th:value="${format}" th:text="${format}" th:selected="${format == game.matchingFormat}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" maxlength="1000" rows="3" th:text="${game.description}"></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Save Game Details</button>
+            </form>
+        </section>
+
+        <section class="card" style="margin-bottom:28px;">
+            <h2 class="section-title">Add <span th:text="${game.gameType == T(com.smartclassroom.smart_classroom.entity.GameType).QUIZ ? 'Quiz Question' : (game.gameType == T(com.smartclassroom.smart_classroom.entity.GameType).MATCHING ? 'Matching Pair' : 'Puzzle Prompt')}"></span></h2>
+            <form th:if="${game.gameType != T(com.smartclassroom.smart_classroom.entity.GameType).MATCHING and (game.gameType != T(com.smartclassroom.smart_classroom.entity.GameType).PUZZLE or game.puzzleTemplate == T(com.smartclassroom.smart_classroom.entity.PuzzleTemplate).WORD or game.puzzleTemplate == T(com.smartclassroom.smart_classroom.entity.PuzzleTemplate).NUMBER)}"
+                  th:action="@{/teacher/games/{id}/questions/add(id=${game.id})}" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="newQuestionText">Question or instruction</label>
+                    <textarea class="form-control" id="newQuestionText" name="questionText" maxlength="1000" rows="2"></textarea>
+                </div>
+                <div th:if="${game.gameType.name() == 'QUIZ'}" class="stats-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                    <div class="form-group"><label class="form-label">Option A</label><input class="form-control" name="optionA" maxlength="500" required></div>
+                    <div class="form-group"><label class="form-label">Option B</label><input class="form-control" name="optionB" maxlength="500" required></div>
+                    <div class="form-group"><label class="form-label">Option C</label><input class="form-control" name="optionC" maxlength="500" required></div>
+                    <div class="form-group"><label class="form-label">Option D</label><input class="form-control" name="optionD" maxlength="500" required></div>
+                    <div class="form-group"><label class="form-label">Correct answer (must match an option)</label><input class="form-control" name="correctAnswer" maxlength="500" required></div>
+                </div>
+                <div th:if="${game.gameType.name() == 'PUZZLE'}" class="card" style="margin:16px 0;">
+                    <p>Grade-based limits are checked when you save. Use comma-separated items and __ for each missing position.</p>
+                    <div class="form-group">
+                        <label class="form-label" for="puzzleTechnique">Puzzle technique</label>
+                        <select class="form-control puzzle-technique" id="puzzleTechnique" name="puzzleTechnique" required>
+                            <option value="">Choose a technique</option>
+                            <option th:each="technique : ${puzzleTechniques}" th:value="${technique}" th:text="${technique}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group puzzle-fields" data-kind="sequence">
+                        <label class="form-label">Supplied numbers or letters (comma-separated)</label>
+                        <input class="form-control" name="suppliedItems" placeholder="5, 1, 4, 2, 3">
+                        <label class="form-label">Correct sequence</label>
+                        <input class="form-control" name="expectedSequence" placeholder="1, 2, 3, 4, 5">
+                    </div>
+                    <div class="form-group puzzle-fields" data-kind="missing">
+                        <label class="form-label">Pattern with __ for each blank</label>
+                        <input class="form-control" name="pattern" placeholder="2, 4, __, 8, 10">
+                        <label class="form-label">Expected values for blanks (comma-separated)</label>
+                        <input class="form-control" name="missingValues" placeholder="6">
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Add Question</button>
+            </form>
+
+            <form id="matchingPairForm"
+                  th:if="${game.gameType == T(com.smartclassroom.smart_classroom.entity.GameType).MATCHING}"
+                  th:action="@{/teacher/games/{id}/questions/matching/add(id=${game.id})}"
+                  method="post">
+                <div class="form-group">
+                    <label class="form-label" for="matchingQuestionText">Activity instruction</label>
+                    <textarea class="form-control" id="matchingQuestionText" name="questionText"
+                              maxlength="1000" rows="2" required>Match each item with its correct pair.</textarea>
+                </div>
+
+                <div id="matchingPairRows" th:attr="data-format=${game.matchingFormat}">
+                    <div class="matching-pair-row card" style="margin:14px 0;">
+                        <div class="stats-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                            <div class="form-group">
+                                <label class="form-label">Left item</label>
+                                <input class="form-control" name="leftItems" maxlength="500" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Correct right item</label>
+                                <input class="form-control" name="rightItems" maxlength="500" required>
+                            </div>
+                            <div class="form-group" th:if="${game.matchingFormat == T(com.smartclassroom.smart_classroom.entity.MatchingFormat).IMAGE_TO_TEXT}">
+                                <label class="form-label">Left image URL or local /images/ path</label>
+                                <input class="form-control" name="leftImageUrls" maxlength="1000" required>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary remove-matching-pair" disabled>
+                            Remove Pair
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" id="addMatchingPair" class="btn btn-secondary">
+                    Add Another Pair
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Add Matching Pairs
+                </button>
+            </form>
+        </section>
+
+        <section>
+            <h2 class="section-title">Questions (<span th:text="${#lists.size(questions)}">0</span>)</h2>
+            <article class="card" style="margin-bottom:18px;" th:each="question : ${questions}">
+                <h3>Question <span th:text="${question.questionOrder}"></span></h3>
+                <p th:if="${game.gameType == T(com.smartclassroom.smart_classroom.entity.GameType).PUZZLE and legacyPuzzleTemplate != null}">
+                    This legacy puzzle is preserved as read-only. Create a new Word or Number Puzzle to add playable questions.
+                </p>
+                <form th:if="${legacyPuzzleTemplate == null or game.gameType != T(com.smartclassroom.smart_classroom.entity.GameType).PUZZLE}"
+                      th:action="@{/teacher/games/{gameId}/questions/{questionId}/update(gameId=${game.id},questionId=${question.id})}" method="post">
+                    <div class="form-group">
+                        <label class="form-label">Question or instruction</label>
+                        <textarea class="form-control" name="questionText" maxlength="1000" rows="2" th:text="${question.questionText}"></textarea>
+                    </div>
+                    <div th:if="${game.gameType.name() == 'QUIZ'}" class="stats-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                        <div class="form-group"><label class="form-label">Option A</label><input class="form-control" name="optionA" maxlength="500" th:value="${question.optionA}" required></div>
+                        <div class="form-group"><label class="form-label">Option B</label><input class="form-control" name="optionB" maxlength="500" th:value="${question.optionB}" required></div>
+                        <div class="form-group"><label class="form-label">Option C</label><input class="form-control" name="optionC" maxlength="500" th:value="${question.optionC}" required></div>
+                        <div class="form-group"><label class="form-label">Option D</label><input class="form-control" name="optionD" maxlength="500" th:value="${question.optionD}" required></div>
+                        <div class="form-group"><label class="form-label">Correct answer</label><input class="form-control" name="correctAnswer" maxlength="500" th:value="${question.correctAnswer}" required></div>
+                    </div>
+                    <div th:if="${game.gameType.name() == 'MATCHING'}" class="stats-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                        <div class="form-group"><label class="form-label">Left item / image label</label><input class="form-control" name="leftItem" maxlength="500" th:value="${question.leftItem}" required></div>
+                        <div class="form-group"><label class="form-label">Right matching text</label><input class="form-control" name="rightItem" maxlength="500" th:value="${question.rightItem}" required></div>
+                        <div class="form-group" th:if="${game.matchingFormat.name() == 'IMAGE_TO_TEXT'}"><label class="form-label">Left image URL or local /images/ path</label><input class="form-control" name="leftImageUrl" maxlength="1000" th:value="${question.leftImageUrl}" required></div>
+                    </div>
+                    <div th:if="${game.gameType.name() == 'PUZZLE'}" class="card" style="margin:12px 0;">
+                        <p>Grade configuration is validated when saved. Separate items with commas; use __ for blanks.</p>
+                        <div class="form-group">
+                            <label class="form-label">Puzzle technique</label>
+                            <select class="form-control puzzle-technique" name="puzzleTechnique" required>
+                                <option th:each="technique : ${puzzleTechniques}" th:value="${technique}"
+                                        th:text="${technique}" th:selected="${technique == question.puzzleTechnique}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group puzzle-fields" data-kind="sequence">
+                            <label class="form-label">Supplied items (comma-separated)</label>
+                            <input class="form-control" name="suppliedItems" th:value="${question.puzzleTokens}">
+                            <label class="form-label">Correct sequence</label>
+                            <input class="form-control" name="expectedSequence" th:value="${question.puzzleAnswerDisplay}">
+                        </div>
+                        <div class="form-group puzzle-fields" data-kind="missing">
+                            <label class="form-label">Pattern with __ for each blank</label>
+                            <input class="form-control" name="pattern" th:value="${question.puzzleTokens}">
+                            <label class="form-label">Expected values for blanks (teacher only)</label>
+                            <input class="form-control" name="missingValues" th:value="${question.correctAnswer}">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                </form>
+                <form th:if="${legacyPuzzleTemplate == null or game.gameType != T(com.smartclassroom.smart_classroom.entity.GameType).PUZZLE}"
+                      style="margin-top:10px;" th:action="@{/teacher/games/{gameId}/questions/{questionId}/delete(gameId=${game.id},questionId=${question.id})}" method="post"
+                      onsubmit="return confirm('Delete this question? Questions with saved student answers cannot be deleted individually.')">
+                    <button class="btn btn-secondary" type="submit">Delete Question</button>
+                </form>
+            </article>
+            <p class="card" th:if="${#lists.isEmpty(questions)}">No questions yet. Add the first question above before assigning this game.</p>
+        </section>
+    </main>
+</div>
+<script>
+    (() => {
+        const rows = document.getElementById('matchingPairRows');
+        const addButton = document.getElementById('addMatchingPair');
+        if (!rows || !addButton) return;
+
+        const imageFormat = rows.dataset.format === 'IMAGE_TO_TEXT';
+
+        function makeField(labelText, name, maxLength, required = true) {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            const label = document.createElement('label');
+            label.className = 'form-label';
+            label.textContent = labelText;
+            const input = document.createElement('input');
+            input.className = 'form-control';
+            input.name = name;
+            input.maxLength = maxLength;
+            input.required = required;
+            group.append(label, input);
+            return group;
+        }
+
+        function updateRemoveButtons() {
+            const pairRows = rows.querySelectorAll('.matching-pair-row');
+            pairRows.forEach(row => {
+                row.querySelector('.remove-matching-pair').disabled = false;
+            });
+        }
+
+        updateRemoveButtons();
+
+        addButton.addEventListener('click', () => {
+            const card = document.createElement('div');
+            card.className = 'matching-pair-row card';
+            card.style.margin = '14px 0';
+            const grid = document.createElement('div');
+            grid.className = 'stats-grid';
+            grid.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+            grid.append(
+                makeField('Left item', 'leftItems', 500),
+                makeField('Correct right item', 'rightItems', 500)
+            );
+            if (imageFormat) {
+                grid.append(makeField(
+                    'Left image URL or local /images/ path', 'leftImageUrls', 1000
+                ));
+            }
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'btn btn-secondary remove-matching-pair';
+            removeButton.textContent = 'Remove Pair';
+            card.append(grid, removeButton);
+            rows.append(card);
+            updateRemoveButtons();
+        });
+
+        rows.addEventListener('click', event => {
+            const removeButton = event.target.closest('.remove-matching-pair');
+            if (removeButton && rows.querySelectorAll('.matching-pair-row').length > 1) {
+                removeButton.closest('.matching-pair-row').remove();
+                updateRemoveButtons();
+            }
+        });
+    })();
+</script>
+<script>
+document.querySelectorAll('form').forEach(form => {
+  const select = form.querySelector('.puzzle-technique');
+  if (!select) return;
+  const sync = () => {
+    if (!select.value) {
+      form.querySelectorAll('.puzzle-fields').forEach(group => group.hidden = true);
+      return;
+    }
+    const sequence = select.value === 'NUMBER_SEQUENCE' || select.value === 'ALPHABET_SEQUENCE';
+    form.querySelectorAll('.puzzle-fields').forEach(group => group.hidden =
+      group.dataset.kind !== (sequence ? 'sequence' : 'missing'));
+  };
+  select.addEventListener('change', sync); sync();
+});
+</script>
+</body>
+</html>

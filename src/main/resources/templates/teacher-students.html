@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+    <main class="main-content role-ui teacher-ui">
+        <div th:replace="~{fragments/topbar :: topbar('Students', 'View students in your assigned classes and review their learning progress')}"></div>
+        <section class="dashboard-content">
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+            <div class="page-header">
+                <h1 th:text="${performanceView ? 'Student Performance' : 'Student List'}">Student List and Performance</h1>
+                <p>Only students in classes where you have active game assignments are listed.</p>
+            </div>
+
+            <form method="get" th:action="@{/teacher/students}" class="card" style="margin-bottom:22px;">
+                <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+                    <div class="form-group">
+                        <label class="form-label" for="studentName">Student name</label>
+                        <input class="form-control" id="studentName" name="name" th:value="${nameFilter}" placeholder="Search by name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="gradeFilter">Grade</label>
+                        <select class="form-control" id="gradeFilter" name="grade">
+                            <option value="">All assigned grades</option>
+                            <option th:each="grade : ${grades}" th:value="${grade}" th:text="${grade}" th:selected="${grade == selectedGrade}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sectionFilter">Section</label>
+                        <select class="form-control" id="sectionFilter" name="section">
+                            <option value="">All assigned sections</option>
+                            <option th:each="value : ${sections}" th:value="${value}" th:text="${value}" th:selected="${value == selectedSection}"></option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Filter Students</button>
+                <a class="btn btn-secondary" th:href="@{/teacher/students}">Clear</a>
+            </form>
+
+            <div class="card" style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:760px;">
+                    <thead><tr>
+                        <th style="text-align:left;padding:12px;">Student</th>
+                        <th style="text-align:left;padding:12px;">Grade / Section</th>
+                        <th style="text-align:left;padding:12px;">Parent contact</th>
+                        <th style="text-align:left;padding:12px;">Game progress</th>
+                        <th style="text-align:left;padding:12px;">Best completed score</th>
+                        <th style="text-align:left;padding:12px;">Details</th>
+                    </tr></thead>
+                    <tbody>
+                    <tr th:each="student : ${students}">
+                        <td style="padding:12px;">
+                            <strong th:text="${student.fullName}">Student</strong><br>
+                            <span class="page-subtitle" th:text="${student.email}">student@example.test</span>
+                        </td>
+                        <td style="padding:12px;" th:text="${student.grade + ' / ' + student.section}">1 / A</td>
+                        <td style="padding:12px;">
+                            <span th:if="${#lists.isEmpty(student.parents)}">No linked parent</span>
+                            <span th:each="parent,stat : ${student.parents}">
+                                <span th:text="${parent.fullName}">Parent</span>
+                                <span th:text="${' (' + parent.email + ')'}">(parent@example.test)</span><br>
+                            </span>
+                        </td>
+                        <td style="padding:12px;" th:text="${student.completedGames + ' completed / ' + student.pendingGames + ' pending'}">0 completed</td>
+                        <td style="padding:12px;">
+                            <span th:if="${student.bestScorePercentage != null}" th:text="${#numbers.formatDecimal(student.bestScorePercentage,1,1) + '%'}">0%</span>
+                            <span th:if="${student.bestScorePercentage == null}">No activity yet</span>
+                        </td>
+                        <td style="padding:12px;"><a class="btn btn-secondary" th:href="@{/teacher/students/{id}(id=${student.id})}">View performance</a></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(students)}"><td colspan="6" style="padding:18px;">No students found in your assigned classes.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

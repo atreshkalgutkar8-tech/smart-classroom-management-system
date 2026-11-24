@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Submit a Concern</title><link rel="stylesheet" th:href="@{/css/dashboard.css}"><script th:src="@{/js/theme.js}" defer></script>    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body><div class="dashboard-layout"><div th:replace="~{fragments/sidebar :: sidebar('PARENT')}"></div>
+<main class="main-content role-ui parent-ui"><div th:replace="~{fragments/topbar :: topbar('Submit a Concern', 'Your message will be visible to the selected teacher')}"></div>
+<section class="dashboard-content">
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+    <form class="card" method="get" th:action="@{/parent/complaints/new}" style="margin-bottom:20px;">
+        <div class="form-group"><label class="form-label" for="studentFilter">Child</label><select class="form-control" id="studentFilter" name="studentId" required>
+            <option value="">Choose a child</option><option th:each="child : ${children}" th:value="${child.id}" th:text="${child.fullName + ' · Grade ' + child.grade + ', Section ' + child.section}" th:selected="${child.id == selectedStudentId}">Student</option>
+        </select></div><button class="btn btn-secondary" type="submit">Choose Child</button>
+    </form>
+    <form class="card" method="post" th:if="${selectedStudentId != null and !#lists.isEmpty(teachers)}" th:action="@{/parent/complaints}">
+        <input type="hidden" name="studentId" th:value="${selectedStudentId}">
+        <div class="form-group"><label class="form-label" for="teacherId">Relevant teacher</label><select class="form-control" id="teacherId" name="teacherId" required>
+            <option value="">Choose a teacher</option><option th:each="teacher : ${teachers}" th:value="${teacher.id}" th:text="${teacher.fullName}">Teacher</option>
+        </select></div>
+        <div class="form-group"><label class="form-label" for="title">Concern title</label><input class="form-control" id="title" name="title" maxlength="180" required></div>
+        <div class="form-group"><label class="form-label" for="description">Description</label><textarea class="form-control" id="description" name="description" rows="5" maxlength="4000" required></textarea></div>
+        <button class="btn btn-primary" type="submit">Submit Concern</button>
+    </form>
+    <div class="card" th:if="${selectedStudentId != null and #lists.isEmpty(teachers)}">No teacher is currently assigned to that child's class. Please contact the school administrator.</div>
+</section></main></div></body></html>

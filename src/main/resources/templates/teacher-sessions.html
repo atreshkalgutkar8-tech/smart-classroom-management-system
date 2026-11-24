@@ -1,0 +1,399 @@
+﻿
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Classroom Sessions | Smart Classroom</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+
+    <style>
+        .page-content {
+            padding: 28px;
+        }
+
+        .page-heading {
+            margin-bottom: 24px;
+        }
+
+        .page-heading h2 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .session-form-card {
+            margin-bottom: 30px;
+        }
+
+        .session-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .session-form button {
+            margin-top: 5px;
+        }
+
+        .session-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .session-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+        }
+
+        .session-card h3 {
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .session-info {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .session-info strong {
+            color: var(--text-primary);
+        }
+
+        .session-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .status-badge {
+            display: inline-block;
+            width: fit-content;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-planned {
+            background: var(--button-secondary);
+            color: var(--text-primary);
+        }
+
+        .status-ongoing {
+            background: var(--alert-success-bg);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background: var(--alert-error-bg);
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            padding: 13px 16px;
+            border-radius: 9px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: var(--alert-success-bg);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: var(--alert-error-bg);
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 35px 20px;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius);
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 650px) {
+            .page-content {
+                padding: 16px;
+            }
+
+            .session-form {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content role-ui teacher-ui">
+
+        <!-- Topbar: both required parameters are supplied -->
+        <header th:replace="~{fragments/topbar :: topbar('Classroom Sessions', 'Create and manage your classroom sessions')}"></header>
+
+        <div class="page-content">
+
+            <!-- Page Heading -->
+            <div class="page-heading">
+                <h2>Classroom Sessions</h2>
+                <p>Create, manage and conduct classroom learning sessions.</p>
+            </div>
+
+            <!-- Success Message -->
+            <div th:if="${success}"
+                 class="alert alert-success"
+                 th:text="${success}">
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${error}"
+                 class="alert alert-error"
+                 th:text="${error}">
+            </div>
+
+            <!-- Create Session -->
+            <section class="card session-form-card">
+
+                <h3>Create New Session</h3>
+
+                <p style="color: var(--text-secondary);">
+                    Enter the details below to schedule a classroom session.
+                </p>
+
+                <form th:action="@{/teacher/sessions/create}"
+                      method="post"
+                      class="session-form">
+
+                    <div class="form-group full-width">
+                        <label for="title">Session Title</label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            placeholder="Example: Introduction to Mathematics"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="grade">Grade</label>
+
+                        <select id="grade" name="grade" required>
+                            <option value="">Select Grade</option>
+                            <option value="1">Grade 1</option>
+                            <option value="2">Grade 2</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+
+                        <select id="subject" name="subject" required>
+                            <option value="">Select Subject</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Kannada">Kannada</option>
+                            <option value="English">English</option>
+                            <option value="EVS">EVS</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="topic">Topic</label>
+
+                        <input
+                            type="text"
+                            id="topic"
+                            name="topic"
+                            placeholder="Enter the lesson topic">
+                    </div>
+
+                    <div class="full-width">
+                        <button type="submit" class="btn btn-primary">
+                            + Create Session
+                        </button>
+                    </div>
+
+                </form>
+
+            </section>
+
+            <!-- Existing Sessions -->
+            <section>
+
+                <div class="page-heading">
+                    <h2>Your Sessions</h2>
+                    <p>View and manage the sessions you have created.</p>
+                </div>
+
+                <div class="session-list">
+
+                    <!-- Session Card -->
+                    <div class="session-card"
+                         th:each="classroomSession : ${sessions}">
+
+                        <h3 th:text="${classroomSession.title}">
+                            Session Title
+                        </h3>
+
+                        <!-- Session Status -->
+                        <span class="status-badge status-planned"
+                              th:if="${classroomSession.status.name() == 'PLANNED'}">
+                            Planned
+                        </span>
+
+                        <span class="status-badge status-ongoing"
+                              th:if="${classroomSession.status.name() == 'ONGOING'}">
+                            Ongoing
+                        </span>
+
+                        <span class="status-badge status-completed"
+                              th:if="${classroomSession.status.name() == 'COMPLETED'}">
+                            Completed
+                        </span>
+
+                        <!-- Session Information -->
+                        <div class="session-info">
+
+                            <div>
+                                <strong>Grade:</strong>
+                                <span th:text="${classroomSession.grade}"></span>
+                            </div>
+
+                            <div>
+                                <strong>Subject:</strong>
+                                <span th:text="${classroomSession.subject}"></span>
+                            </div>
+
+                            <div>
+                                <strong>Topic:</strong>
+                                <span th:text="${classroomSession.topic != null and !classroomSession.topic.isEmpty() ? classroomSession.topic : 'Not specified'}"></span>
+                            </div>
+
+                        </div>
+
+                        <!-- Session Actions -->
+                        <div class="session-actions">
+
+                            <a class="btn btn-secondary"
+                               th:href="@{/teacher/sessions/{id}/participation(id=${classroomSession.id})}">
+                                Participants
+                            </a>
+
+                            <a class="btn btn-secondary"
+                               th:href="@{/teacher/sessions/{id}/resources(id=${classroomSession.id})}">
+                                Manage Resources
+                            </a>
+
+                            <a class="btn btn-secondary"
+                               th:href="@{/teacher/sessions/{id}/presentation(id=${classroomSession.id})}">
+                                Presentation Screen
+                            </a>
+
+                            <!-- Start Session -->
+                            <form th:if="${classroomSession.status.name() == 'PLANNED'}"
+                                  th:action="@{/teacher/sessions/{id}/start(id=${classroomSession.id})}"
+                                  method="post">
+
+                                <button type="submit" class="btn btn-primary">
+                                    Start Session
+                                </button>
+
+                            </form>
+
+                            <!-- Complete Session -->
+                            <form th:if="${classroomSession.status.name() == 'ONGOING'}"
+                                  th:action="@{/teacher/sessions/{id}/complete(id=${classroomSession.id})}"
+                                  method="post">
+
+                                <button type="submit" class="btn btn-secondary">
+                                    Complete Session
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state" th:if="${#lists.isEmpty(sessions)}">
+                        <h3>No Sessions Yet</h3>
+                        <p>Create your first classroom session using the form above.</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

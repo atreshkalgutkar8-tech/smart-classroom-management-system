@@ -1,0 +1,263 @@
+﻿
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Games | Smart Classroom</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+
+    <style>
+        .page-content {
+            padding: 24px;
+        }
+
+        .page-heading {
+            margin-bottom: 24px;
+        }
+
+        .page-heading h2 {
+            margin-bottom: 6px;
+        }
+
+        .page-heading p {
+            color: var(--muted-text, #aaa);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .game-card {
+            background: var(--card-bg, #1c1c28);
+            border: 1px solid var(--border-color, #30303d);
+            border-radius: 14px;
+            padding: 22px;
+            transition: transform 0.2s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .game-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.15);
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .game-card h3 {
+            margin-bottom: 8px;
+        }
+
+        .game-description {
+            color: var(--muted-text, #aaa);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .game-details {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .game-details span {
+            color: var(--muted-text, #aaa);
+        }
+
+        .game-details strong {
+            color: var(--text-color, #fff);
+        }
+
+        .play-btn {
+            display: block;
+            width: 100%;
+            padding: 11px;
+            text-align: center;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .play-btn:hover {
+            background: #4f46e5;
+        }
+
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+            background: var(--card-bg, #1c1c28);
+            border: 1px solid var(--border-color, #30303d);
+            border-radius: 14px;
+        }
+
+        .empty-state .icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: var(--muted-text, #aaa);
+        }
+
+        .message {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #451c24;
+            color: #fca5a5;
+        }
+
+        @media (max-width: 600px) {
+            .page-content {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- Student Sidebar -->
+    <aside th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></aside>
+
+    <main class="main-content student-page student-games-page">
+
+        <!-- Topbar -->
+        <div th:replace="~{fragments/topbar :: topbar('My Games', 'Learn and play educational games')}"></div>
+
+        <div class="page-content">
+
+            <div class="page-heading">
+                <h2>My Educational Games</h2>
+                <p>Play games assigned by your teacher and improve your learning.</p>
+            </div>
+
+            <section th:if="${not #lists.isEmpty(completedAttempts)}"
+                     style="margin-bottom: 24px;">
+                <h3 style="margin-bottom: 14px;">Previous Game Results</h3>
+                <div class="games-grid">
+                    <div class="game-card" th:each="attempt : ${completedAttempts}">
+                        <h3 th:text="${attempt.assignment.game.title}">Game Title</h3>
+                        <p class="game-description"
+                           th:text="${'Attempt ' + attempt.attemptNumber + ': ' + attempt.score + '/' + attempt.totalQuestions}">
+                            Attempt result
+                        </p>
+                        <span th:if="${attempt.late}" class="status status-warning">Late</span>
+                        <a class="play-btn"
+                           th:href="@{/student/games/attempts/{attemptId}/result(attemptId=${attempt.id})}">
+                            View Result
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Message -->
+            <div th:if="${errorMessage}"
+                 class="message"
+                 th:text="${errorMessage}">
+            </div>
+
+            <!-- No Games -->
+            <div th:if="${#lists.isEmpty(assignments)}"
+                 class="empty-state">
+
+                <div class="icon" aria-hidden="true">PLAY</div>
+
+                <h3>No Games Assigned Yet</h3>
+
+                <p>
+                    Your teacher hasn't assigned any games to your class.
+                    Check again later!
+                </p>
+
+            </div>
+
+            <!-- Assigned Games -->
+            <div class="games-grid"
+                 th:unless="${#lists.isEmpty(assignments)}">
+
+                <div class="game-card"
+                     th:each="assignment : ${assignments}">
+
+                    <div class="game-icon" aria-hidden="true">GO</div>
+
+                    <h3 th:text="${assignment.game.title}">
+                        Game Title
+                    </h3>
+
+                    <p class="game-description"
+                       th:text="${assignment.game.description != null
+                       ? assignment.game.description
+                       : 'Complete this educational game and test your knowledge.'}">
+                    </p>
+
+                    <div class="game-details">
+
+                        <div>
+                            <span>Game Type: </span>
+                            <strong th:text="${assignment.game.gameType}"></strong>
+                        </div>
+
+                        <div>
+                            <span>Subject: </span>
+                            <strong th:text="${assignment.game.subject}"></strong>
+                        </div>
+
+                        <div>
+                            <span>Grade: </span>
+                            <strong th:text="${assignment.grade}"></strong>
+                        </div>
+
+                        <div>
+                            <span>Section: </span>
+                            <strong th:text="${assignment.section}"></strong>
+                        </div>
+
+                        <div>
+                            <span>Deadline: </span>
+                            <strong th:text="${#temporals.format(
+                                assignment.deadline,
+                                'dd MMM yyyy, hh:mm a')}">
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <a class="play-btn"
+                       th:href="@{/student/games/{assignmentId}/play(
+                           assignmentId=${assignment.id})}">
+                        Play Game</a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

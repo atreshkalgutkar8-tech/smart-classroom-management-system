@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Activities | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></aside>
+    <main class="main-content student-page student-activities-page">
+        <header th:replace="~{fragments/topbar :: topbar('My Activities', 'Hands-on learning activities for your grade')}"></header>
+        <div class="page-content">
+            <div class="page-heading"><h2>DIY Activities</h2><p>Choose an activity, follow the instructions and learn by doing.</p></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            <div class="stats-grid" th:if="${!#lists.isEmpty(activities)}">
+                <article class="card" th:each="item : ${activities}">
+                    <p class="status-badge" th:text="${item.completed ? 'Completed' : 'Ready to try'}">Ready to try</p>
+                    <h3 th:text="${item.activity.title}">Activity</h3>
+                    <p th:text="${'Grade ' + item.activity.grade + ' · ' + item.activity.subject + ' · ' + item.activity.topic}">Grade · Subject · Topic</p>
+                    <p th:text="${item.activity.learningObjective}">Learning objective</p>
+                    <a class="btn btn-primary" th:href="@{/student/activities/{id}(id=${item.activity.id})}">Open Activity</a>
+                </article>
+            </div>
+            <div class="empty-state" th:if="${#lists.isEmpty(activities)}"><h3>No activities available yet</h3><p>Activities for your grade will appear here.</p></div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

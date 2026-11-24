@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Classroom | Create Account</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            margin: 0;
+            background: #f1f5f9;
+            color: #172033;
+            font-family: Arial, sans-serif;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .register-card {
+            width: 100%;
+            padding: 35px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .register-brand {
+            text-align: center;
+            font-size: 25px;
+            font-weight: bold;
+            color: #172033;
+            margin: 0 0 8px;
+        }
+
+        .register-brand span {
+            color: #4f46e5;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin: 17px 0 8px;
+            font-weight: 600;
+            color: #172033;
+        }
+
+        input,
+        select {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #172033;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        .register-submit {
+            display: block;
+            width: 100%;
+            margin-top: 25px;
+            padding: 13px;
+            border: none;
+            border-radius: 9px;
+            background: #4f46e5;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .register-submit:hover {
+            background: #4338ca;
+        }
+
+        .message {
+            padding: 11px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #b42318;
+            background: #fee2e2;
+        }
+
+        .success {
+            color: #067647;
+            background: #d1fae5;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 23px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #4f46e5;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .register-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="register-container">
+
+        <div class="register-card">
+
+            <h1 class="register-brand">
+                Smart<span>Classroom</span>
+            </h1>
+
+            <p class="subtitle">
+                Create your account to get started
+            </p>
+
+            <!-- Error message -->
+            <p class="message error"
+               th:if="${error}"
+               th:text="${error}">
+            </p>
+
+            <!-- Success message -->
+            <p class="message success"
+               th:if="${success}"
+               th:text="${success}">
+            </p>
+
+            <!-- Registration form -->
+            <form th:action="@{/register}" method="post">
+
+                <label for="fullName">Full Name</label>
+
+                <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    required
+                    maxlength="100"
+                    placeholder="Enter your full name">
+
+                <label for="email">Email Address</label>
+
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    maxlength="150"
+                    placeholder="Enter your email">
+
+                <label for="password">Password</label>
+
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    minlength="8"
+                    placeholder="At least 8 characters">
+
+                <label for="role">Account Type</label>
+
+                <select id="role" name="role" required>
+
+                    <option value="">Choose your role</option>
+
+                    <option value="TEACHER">Teacher</option>
+
+                    <option value="PARENT">Parent</option>
+
+                </select>
+
+                <button type="submit" class="register-submit">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="footer">
+                Already registered?
+                <a th:href="@{/login}">Login here</a>
+            </p>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Parent Conversation</title><link rel="stylesheet" th:href="@{/css/dashboard.css}"><script th:src="@{/js/theme.js}" defer></script>    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body><div class="dashboard-layout"><div th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></div>
+<main class="main-content role-ui teacher-ui"><div th:replace="~{fragments/topbar :: topbar('Parent Communication', 'Keep messages professional and focused on learning')}"></div>
+<section class="dashboard-content">
+    <p style="margin-bottom:20px;"><a class="btn btn-secondary" th:href="@{/teacher/parents/conversations}">Back to conversations</a></p>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+    <div class="page-header"><h1 th:text="${conversation.parentName}">Parent</h1><p>Conversation about <strong th:text="${conversation.studentName}">Student</strong></p></div>
+    <div class="card" style="margin-bottom:20px;">
+        <article th:each="message : ${conversation.messages}" style="padding:14px 0;border-bottom:1px solid var(--border);">
+            <strong th:text="${message.senderName}">Sender</strong>
+            <span class="page-subtitle" th:text="${' · ' + message.senderRole}"> · PARENT</span>
+            <span class="page-subtitle" th:text="${' · ' + #temporals.format(message.sentAt,'dd MMM yyyy, hh:mm a')}"> · time</span>
+            <span class="page-subtitle" th:if="${message.readAt != null}"> · Read</span>
+            <p style="white-space:pre-wrap;" th:text="${message.content}">Message content</p>
+        </article>
+        <p th:if="${#lists.isEmpty(conversation.messages)}">No messages yet. Start the conversation below.</p>
+    </div>
+    <form class="card" method="post" th:action="@{/teacher/parents/conversations/{id}/messages(id=${conversation.id})}">
+        <div class="form-group"><label class="form-label" for="message">Message</label><textarea class="form-control" id="message" name="content" rows="4" maxlength="4000" required></textarea></div>
+        <button class="btn btn-primary" type="submit">Send Message</button>
+    </form>
+</section></main></div></body></html>

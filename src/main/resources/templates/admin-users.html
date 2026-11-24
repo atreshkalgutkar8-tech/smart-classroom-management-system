@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('ADMIN')}"></aside>
+    <main class="main-content role-ui admin-ui">
+        <header th:replace="~{fragments/topbar :: topbar('User Management', 'Review registered accounts by role')}"></header>
+        <section class="page-content">
+            <div class="page-heading"><h2>Registered Users</h2><p>Passwords and password hashes are never displayed here.</p></div>
+            <div class="stats-grid">
+                <article class="card"><h3>Students</h3><p>Manage student accounts, grades, sections and passwords.</p><a class="btn btn-primary" th:href="@{/admin/students}">Student Management</a></article>
+                <article class="card"><h3>Parent links</h3><p>Connect parent accounts to their children.</p><a class="btn btn-secondary" th:href="@{/admin/parent-student-linking}">Parent-Student Linking</a></article>
+                <article class="card"><h3>Create an account</h3><p>Teacher and parent accounts can register through the existing account form.</p><a class="btn btn-secondary" th:href="@{/register}">Open Registration</a></article>
+            </div>
+            <div class="card" style="overflow-x:auto;margin-top:22px;">
+                <table style="width:100%;border-collapse:collapse;min-width:620px;">
+                    <thead><tr><th style="text-align:left;padding:12px;">Name</th><th style="text-align:left;padding:12px;">Email</th><th style="text-align:left;padding:12px;">Role</th><th style="text-align:left;padding:12px;">Class</th></tr></thead>
+                    <tbody>
+                    <tr th:each="user : ${users}">
+                        <td style="padding:12px;" th:text="${user.fullName}">Name</td>
+                        <td style="padding:12px;" th:text="${user.email}">Email</td>
+                        <td style="padding:12px;" th:text="${user.role}">Role</td>
+                        <td style="padding:12px;" th:text="${user.grade == null ? '—' : 'Grade ' + user.grade + (user.section == null ? '' : ', Section ' + user.section)}">—</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(users)}"><td colspan="4" style="padding:16px;">No registered users found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

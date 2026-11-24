@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Contact Teacher</title><link rel="stylesheet" th:href="@{/css/dashboard.css}"><script th:src="@{/js/theme.js}" defer></script>    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body><div class="dashboard-layout"><div th:replace="~{fragments/sidebar :: sidebar('PARENT')}"></div>
+<main class="main-content role-ui parent-ui"><div th:replace="~{fragments/topbar :: topbar('Contact a Teacher', 'Choose a teacher assigned to your child’s class')}"></div>
+<section class="dashboard-content">
+    <div class="card">
+        <h1 th:text="${student.fullName}">Student</h1><p>Grade <span th:text="${student.grade}">1</span>, Section <span th:text="${student.section}">A</span></p>
+        <form method="post" th:action="@{/parent/conversations/open}">
+            <input type="hidden" name="studentId" th:value="${student.id}">
+            <div class="form-group"><label class="form-label" for="teacherId">Teacher</label>
+                <select class="form-control" id="teacherId" name="teacherId" required>
+                    <option value="">Choose a teacher</option>
+                    <option th:each="teacher : ${teachers}" th:value="${teacher.id}" th:text="${teacher.fullName}">Teacher</option>
+                </select>
+            </div>
+            <p class="page-subtitle" th:if="${#lists.isEmpty(teachers)}">No teacher is currently assigned to this child's class.</p>
+            <button class="btn btn-primary" type="submit" th:disabled="${#lists.isEmpty(teachers)}">Open Conversation</button>
+        </form>
+    </div>
+</section></main></div></body></html>

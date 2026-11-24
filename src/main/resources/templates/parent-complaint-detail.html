@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Concern Details</title><link rel="stylesheet" th:href="@{/css/dashboard.css}"><script th:src="@{/js/theme.js}" defer></script>    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body><div class="dashboard-layout"><div th:replace="~{fragments/sidebar :: sidebar('PARENT')}"></div>
+<main class="main-content role-ui parent-ui"><div th:replace="~{fragments/topbar :: topbar('Concern Details', 'View the teacher’s response and current status')}"></div>
+<section class="dashboard-content">
+    <p style="margin-bottom:20px;"><a class="btn btn-secondary" th:href="@{/parent/complaints}">Back to concerns</a></p>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div><div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+    <article class="card" style="margin-bottom:20px;"><h1 th:text="${complaint.title}">Concern</h1>
+        <p>For <strong th:text="${complaint.studentName}">Student</strong> · Teacher <strong th:text="${complaint.assignedTeacherName}">Teacher</strong></p>
+        <p>Status: <strong th:text="${complaint.status}">OPEN</strong></p>
+        <p style="white-space:pre-wrap;" th:text="${complaint.description}">Description</p>
+    </article>
+    <h2 class="section-title">Conversation History</h2>
+    <div class="card" style="margin-bottom:20px;">
+        <article th:each="message : ${complaint.history}" style="padding:14px 0;border-bottom:1px solid var(--border);">
+            <strong th:text="${message.senderName}">Sender</strong><span class="page-subtitle" th:text="${' · ' + message.senderRole}"> · TEACHER</span>
+            <span class="page-subtitle" th:text="${' · ' + #temporals.format(message.sentAt,'dd MMM yyyy, hh:mm a')}"> · date</span>
+            <p style="white-space:pre-wrap;" th:text="${message.content}">Message</p>
+            <span class="page-subtitle" th:if="${message.statusAfter != null}" th:text="${'Status changed to ' + message.statusAfter}">Status event</span>
+        </article>
+    </div>
+    <form class="card" method="post" th:action="@{/parent/complaints/{id}/reply(id=${complaint.id})}">
+        <div class="form-group"><label class="form-label" for="reply">Reply to teacher</label><textarea class="form-control" id="reply" name="content" rows="4" maxlength="4000" required></textarea></div>
+        <button class="btn btn-primary" type="submit">Send Reply</button>
+    </form>
+</section></main></div></body></html>

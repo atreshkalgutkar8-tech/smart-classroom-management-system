@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/topbar :: topbar('Student Dashboard', 'Your learning space')}"></header>
+        <section class="page-content student-dashboard-content">
+            <section class="student-welcome" aria-labelledby="student-welcome-title">
+                <div class="student-welcome-copy">
+                    <span class="student-eyebrow">YOUR LEARNING SPACE</span>
+                    <h2 id="student-welcome-title">Welcome back!</h2>
+                    <p>Ready to play, make, and discover something new today?</p>
+                </div>
+                <div class="student-welcome-art" aria-hidden="true"><span>&#10024;</span><span>&#128218;</span><span>&#10024;</span></div>
+            </section>
+            <div class="alert alert-error" th:if="${dashboard.classMessage != null}" th:text="${dashboard.classMessage}"></div>
+
+            <section aria-label="Your learning at a glance">
+                <h2 class="student-section-title">Your learning at a glance</h2>
+                <div class="student-stats-grid">
+                    <article class="card student-stat-card student-stat-games">
+                        <span class="student-stat-icon" aria-hidden="true">&#127918;</span>
+                        <h3>Assigned games</h3>
+                        <p class="student-stat-value" th:text="${dashboard.assignedGames}">0</p>
+                        <a class="btn btn-secondary" th:href="@{/student/games}">Open Games <span aria-hidden="true">&#8594;</span></a>
+                    </article>
+                    <article class="card student-stat-card student-stat-completed">
+                        <span class="student-stat-icon" aria-hidden="true">&#127942;</span>
+                        <h3>Completed games</h3>
+                        <p class="student-stat-value" th:text="${dashboard.completedGames}">0</p>
+                        <span class="student-stat-note">Every game is a new adventure!</span>
+                    </article>
+                    <article class="card student-stat-card student-stat-activities">
+                        <span class="student-stat-icon" aria-hidden="true">&#127912;</span>
+                        <h3>DIY activities completed</h3>
+                        <p class="student-stat-value" th:text="${dashboard.completedActivities}">0</p>
+                        <a class="btn btn-secondary" th:href="@{/student/activities}">Open Activities <span aria-hidden="true">&#8594;</span></a>
+                    </article>
+                    <article class="card student-stat-card student-stat-progress">
+                        <span class="student-stat-icon" aria-hidden="true">&#127775;</span>
+                        <h3>Game completion progress</h3>
+                        <p class="student-progress-copy" th:if="${dashboard.gameCompletionPercentage != null}"
+                           th:text="${#numbers.formatDecimal(dashboard.gameCompletionPercentage, 1, 1) + '% of assigned games completed'}">Progress</p>
+                        <p class="student-progress-copy" th:if="${dashboard.gameCompletionPercentage == null}">No games assigned yet</p>
+                        <div class="student-progress-track" th:if="${dashboard.gameCompletionPercentage != null}" role="progressbar"
+                             th:attr="aria-valuenow=${dashboard.gameCompletionPercentage},aria-valuemin=0,aria-valuemax=100">
+                            <div class="student-progress-value" th:style="${'width:' + dashboard.gameCompletionPercentage + '%'}"></div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="student-quick-section">
+                <h2 class="student-section-title">What would you like to do?</h2>
+                <div class="student-quick-actions">
+                    <article class="card student-action-card student-action-game">
+                        <span class="student-action-icon" aria-hidden="true">&#127919;</span>
+                        <h3>Play a Game</h3>
+                        <p class="page-subtitle">Open games your teacher assigned to your class.</p>
+                        <a class="btn btn-primary" th:href="@{/student/games}">View Assigned Games <span aria-hidden="true">&#8594;</span></a>
+                    </article>
+                    <article class="card student-action-card student-action-diy">
+                        <span class="student-action-icon" aria-hidden="true">&#129513;</span>
+                        <h3>Try a DIY Activity</h3>
+                        <p class="page-subtitle">Follow the instructions and learn by making.</p>
+                        <a class="btn btn-primary" th:href="@{/student/activities}">Browse Activities <span aria-hidden="true">&#8594;</span></a>
+                    </article>
+                    <article class="card student-action-card student-action-message">
+                        <span class="student-action-icon" aria-hidden="true">&#128172;</span>
+                        <h3>Message Your Teacher</h3>
+                        <p class="page-subtitle">Read messages and ask your teacher a question.</p>
+                        <a class="btn btn-primary" th:href="@{/student/communication}">Open Communication <span aria-hidden="true">&#8594;</span></a>
+                    </article>
+                </div>
+            </section>
+
+            <section class="card student-recent-card">
+                <div class="student-recent-heading">
+                    <div><span class="student-eyebrow">LOOK HOW FAR YOU'VE COME</span><h2>Recent learning activity</h2></div>
+                    <span class="student-recent-star" aria-hidden="true">&#10024;</span>
+                </div>
+                <div th:each="event : ${dashboard.recentActivity}" class="student-activity-row">
+                    <span th:if="${event.activityType == 'Game completed'}" class="student-activity-icon student-activity-game" aria-hidden="true">&#127918;</span><span th:unless="${event.activityType == 'Game completed'}" class="student-activity-icon student-activity-diy" aria-hidden="true">&#127912;</span>
+                    <div class="student-activity-main">
+                        <strong th:text="${event.title}">Activity</strong>
+                        <div class="page-subtitle" th:text="${event.activityType + ' - ' + event.subject}">Type - Subject</div>
+                    </div>
+                    <div class="student-activity-meta">
+                        <span class="student-activity-score" th:if="${event.scorePercentage != null}" th:text="${#numbers.formatDecimal(event.scorePercentage, 1, 1) + '%'}">Score</span>
+                        <time class="page-subtitle" th:text="${event.occurredAt == null ? 'Date unavailable' : #temporals.format(event.occurredAt, 'dd MMM yyyy, hh:mm a')}">Date</time>
+                    </div>
+                </div>
+                <p class="page-subtitle student-empty-activity" th:if="${#lists.isEmpty(dashboard.recentActivity)}">No completed learning activity yet. Your completed games and activities will appear here.</p>
+            </section>
+        </section>
+    </main>
+</div>
+</body>
+</html>

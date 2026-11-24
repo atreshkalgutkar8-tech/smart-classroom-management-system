@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Messages | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<div class="dashboard-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></div>
+    <main class="main-content student-page student-messages-page">
+        <div th:replace="~{fragments/topbar :: topbar('My Messages', 'Messages from your teacher')}"></div>
+        <section class="dashboard-content">
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+            <div class="page-header">
+                <h1>My Messages</h1>
+                <p>Read your teacher's notes and send a reply when you need to.</p>
+                <p class="page-subtitle" th:text="${unreadCount + ' new messages'}">0 new messages</p>
+            </div>
+            <div class="card student-message-thread" th:each="thread : ${conversations}" style="margin-bottom:14px;">
+                <h2 th:text="${thread.teacherName}">Teacher</h2>
+                <p th:if="${thread.lastMessage != null}" style="white-space:pre-wrap;"
+                   th:text="${thread.lastMessage}">Latest message</p>
+                <p th:if="${thread.lastMessage == null}" class="page-subtitle">Your conversation is ready. Say hello!</p>
+                <p class="page-subtitle" th:if="${thread.lastMessageAt != null}"
+                   th:text="${#temporals.format(thread.lastMessageAt, 'dd MMM yyyy, hh:mm a')}">Message time</p>
+                <span th:if="${thread.unreadCount > 0}" class="badge"
+                      th:text="${thread.unreadCount + ' new'}">New</span>
+                <a class="btn btn-primary"
+                   th:href="@{/student/communication/{id}(id=${thread.id})}">Open Messages</a>
+            </div>
+            <div class="card student-empty-message" th:if="${#lists.isEmpty(conversations)}">
+                No messages yet. Your teacher can start a conversation with you here.
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

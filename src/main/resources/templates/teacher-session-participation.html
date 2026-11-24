@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Session Participation | Smart Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/role-ui.css}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('TEACHER')}"></aside>
+    <main class="main-content role-ui teacher-ui">
+        <header th:replace="~{fragments/topbar :: topbar('Session Participation', 'Record students who participated in this session')}"></header>
+        <div class="page-content">
+            <div class="page-heading">
+                <h2 th:text="${page.session.title}">Classroom session</h2>
+                <p>
+                    Grade <span th:text="${page.session.grade}">1</span> ·
+                    <span th:text="${page.session.subject}">Subject</span> ·
+                    <span th:text="${page.session.topic}">Topic</span>
+                </p>
+                <p>Session status: <strong th:text="${page.session.status}">ONGOING</strong></p>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <section class="card">
+                <h3>Record participating students</h3>
+                <p>Select students who participated in this classroom session. Saving again will not create duplicate records.</p>
+
+                <div th:if="${page.session.status.name() == 'PLANNED'}" class="empty-state">
+                    <p>Start the session before recording participation.</p>
+                </div>
+
+                <form th:if="${page.session.status.name() != 'PLANNED'}"
+                      th:action="@{/teacher/sessions/{id}/participation(id=${page.session.id})}" method="post">
+                    <div th:if="${#lists.isEmpty(page.eligibleStudents)}" class="empty-state">
+                        <p>No students are currently eligible in your authorized classes for this grade.</p>
+                    </div>
+                    <div th:each="student : ${page.eligibleStudents}" class="session-info" style="margin: 12px 0;">
+                        <label style="display:flex; gap:12px; align-items:center;">
+                            <input type="checkbox" name="studentIds" th:value="${student.id}"
+                                   th:disabled="${student.recorded}" th:checked="${student.recorded}">
+                            <span>
+                                <strong th:text="${student.name}">Student name</strong>
+                                <span> — Grade <span th:text="${student.grade}">1</span>, Section <span th:text="${student.section}">A</span></span>
+                                <span th:if="${student.recorded}" class="status-badge status-completed">Recorded</span>
+                            </span>
+                        </label>
+                    </div>
+                    <button th:if="${page.session.status.name() != 'PLANNED' and !#lists.isEmpty(page.eligibleStudents)}"
+                            type="submit" class="btn btn-primary">Save Participation</button>
+                </form>
+            </section>
+
+            <section class="card" style="margin-top: 24px;">
+                <h3>Participation history</h3>
+                <div th:if="${#lists.isEmpty(page.participants)}" class="empty-state">
+                    <p>No participation has been recorded for this session yet.</p>
+                </div>
+                <div th:each="participant : ${page.participants}" class="session-info" style="margin: 12px 0;">
+                    <strong th:text="${participant.name}">Student name</strong>
+                    <span> — Grade <span th:text="${participant.grade}">1</span>, Section <span th:text="${participant.section}">A</span></span>
+                    <span> · Participated <time th:text="${#temporals.format(participant.participatedAt, 'dd MMM yyyy, hh:mm a')}">date</time></span>
+                </div>
+                <a class="btn btn-secondary" th:href="@{/teacher/sessions}">Back to Sessions</a>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

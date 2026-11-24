@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Game Result | Smart Classroom</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/student-dashboard.css}">
+</head>
+
+<body>
+
+<div class="dashboard-container student-result-layout">
+
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar('STUDENT')}"></div>
+
+    <main class="main-content student-page student-result-page">
+
+        <!-- Topbar -->
+        <div th:replace="~{fragments/topbar :: topbar('Game Result', 'Your learning performance')}"></div>
+
+        <section class="dashboard-content">
+
+            <div class="page-header">
+                <h1>Game Completed!</h1>
+                <p>Great job! Here is your performance summary.</p>
+            </div>
+
+            <!-- Result Card -->
+            <div class="dashboard-card student-result-card">
+
+                <div class="card-header">
+                    <h2 th:text="${game.title}">Game Title</h2>
+                    <span class="status-badge">Completed</span>
+                    <span class="status status-warning" th:if="${attempt.late}">Late</span>
+                </div>
+
+                <div class="result-score">
+
+                    <p>Your Score</p>
+
+                    <h1>
+                        <span th:text="${attempt.score}">0</span>
+                        /
+                        <span th:text="${attempt.totalQuestions}">0</span>
+                    </h1>
+
+                    <p>Correct Answers</p>
+
+                </div>
+
+                <div class="result-details">
+
+                    <div class="result-detail-item">
+                        <h3>Attempt Number</h3>
+                        <p th:text="${attempt.attemptNumber}">1</p>
+                    </div>
+
+                    <div class="result-detail-item">
+                        <h3>Total Questions</h3>
+                        <p th:text="${attempt.totalQuestions}">0</p>
+                    </div>
+
+                    <div class="result-detail-item">
+                        <h3>Time Taken</h3>
+                        <p>
+                            <span th:text="${attempt.timeTakenSeconds}">0</span>
+                            seconds
+                        </p>
+                    </div>
+
+                    <div class="result-detail-item">
+                        <h3>Completed On</h3>
+                        <p th:text="${#temporals.format(attempt.completedAt, 'dd MMM yyyy, hh:mm a')}">
+                            Completion Date
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="result-actions">
+
+                    <a th:href="@{/student/games}"
+                       class="btn btn-primary">
+                        Back to My Games
+                    </a>
+
+                    <a th:href="@{/student/dashboard}"
+                       class="btn btn-secondary">
+                        Go to Dashboard
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script th:src="@{/js/theme.js}"></script>
+
+</body>
+</html>

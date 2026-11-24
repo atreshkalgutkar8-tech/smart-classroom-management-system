@@ -1,0 +1,43 @@
+﻿/* Parent, Teacher and Admin presentation layer. Uses the existing theme palette. */
+.role-ui { min-width: 0; color: var(--text-primary); }
+.role-ui .dashboard-content, .role-ui .page-content { width: min(100%, 1440px); max-width: 1440px; margin-inline: auto; padding: 24px 0; color: var(--text-primary); }
+.role-ui .page-header, .role-ui .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin: 0 0 22px; padding: 20px 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+.role-ui .page-header h1, .role-ui .page-heading h1, .role-ui .page-heading h2 { margin: 0 0 7px; color: var(--text-primary); font-size: clamp(21px, 2.4vw, 28px); line-height: 1.25; }
+.role-ui .page-header p, .role-ui .page-heading p { color: var(--text-secondary); line-height: 1.6; }
+.role-ui .section-title { margin: 0 0 16px; color: var(--text-primary); font-size: 18px; line-height: 1.35; }
+.role-ui .card, .role-ui .dashboard-card, .role-ui .assignment-card { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); color: var(--text-primary); }
+.role-ui .dashboard-card, .role-ui .assignment-card { padding: 22px; }
+.role-ui .dashboard-card h2, .role-ui .assignment-card h2 { margin: 0 0 12px; color: var(--text-primary); }
+.role-ui .card p, .role-ui .dashboard-card p, .role-ui .assignment-card p { line-height: 1.6; }
+.role-ui .stats-grid, .role-ui .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)) !important; align-items: stretch; gap: 16px; }
+.role-ui .stats-grid > .card, .role-ui .dashboard-grid > .dashboard-card { height: 100%; }
+.role-ui .btn, .role-ui button.btn { min-height: 40px; border-radius: 9px; }
+.role-ui .btn:focus-visible, .role-ui button:focus-visible, .role-ui input:focus-visible, .role-ui select:focus-visible, .role-ui textarea:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.role-ui .form-group { min-width: 0; margin-bottom: 16px; }
+.role-ui .form-label, .role-ui label { color: var(--text-secondary); font-weight: 600; line-height: 1.45; }
+.role-ui input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), .role-ui select, .role-ui textarea { max-width: 100%; border-radius: 9px; }
+.role-ui textarea { min-height: 110px; line-height: 1.55; }
+.role-ui form.card, .role-ui form.dashboard-card { display: block; }
+.role-ui .table-wrapper, .role-ui .table-container, .role-ui .table-responsive { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+.role-ui .table-wrapper > table, .role-ui .table-container > table, .role-ui .table-responsive > table, .role-ui .card table { width: 100%; min-width: 640px; border-collapse: separate; border-spacing: 0; }
+.role-ui table th { position: sticky; top: 0; background: var(--bg-card-hover); color: var(--text-secondary); font-size: 12px; font-weight: 700; letter-spacing: .025em; }
+.role-ui table th, .role-ui table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.role-ui table tr:last-child td { border-bottom: 0; }
+.role-ui table tbody tr:hover { background: var(--bg-card-hover); }
+.role-ui .status, .role-ui .status-badge, .role-ui .badge { display: inline-flex; align-items: center; gap: 6px; width: fit-content; max-width: 100%; padding: 5px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--sidebar-active); color: var(--text-primary); font-size: 12px; font-weight: 650; line-height: 1.35; }
+.role-ui .status-success, .role-ui .status-completed { border-color: transparent; background: var(--alert-success-bg); color: var(--success); }
+.role-ui .status-warning, .role-ui .status-planned { color: var(--warning); }
+.role-ui .status-danger, .role-ui .status-ongoing { color: var(--danger); }
+.role-ui .alert, .role-ui .message { border: 1px solid var(--border); border-radius: 10px; line-height: 1.55; }
+.role-ui .alert-success, .role-ui .success { background: var(--alert-success-bg); color: var(--success); }
+.role-ui .alert-error, .role-ui .alert-danger, .role-ui .error { background: var(--alert-error-bg); color: var(--danger); }
+.role-ui .empty-state { display: grid; justify-items: center; gap: 8px; padding: 30px 22px; border: 1px dashed var(--border); border-radius: var(--radius); background: var(--bg-card); color: var(--text-secondary); text-align: center; }
+.role-ui .empty-state h2, .role-ui .empty-state h3 { margin: 0; color: var(--text-primary); }
+.role-ui .empty-state p { max-width: 58ch; margin: 0; color: var(--text-secondary); line-height: 1.6; }
+.role-ui .session-info { min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); }
+.role-ui .page-subtitle { line-height: 1.55; }
+.role-ui img, .role-ui video, .role-ui iframe { max-width: 100%; }
+.role-ui pre, .role-ui [style*="white-space:pre-wrap"] { overflow-wrap: anywhere; }
+@media (max-width: 900px) { .role-ui .main-content { min-width: 0; } .role-ui .table-wrapper > table, .role-ui .table-container > table, .role-ui .table-responsive > table { min-width: 600px; } }
+@media (max-width: 700px) { .role-ui .dashboard-content, .role-ui .page-content { padding: 16px 0; } .role-ui .page-header, .role-ui .page-heading { flex-direction: column; padding: 16px; } .role-ui .dashboard-grid, .role-ui .stats-grid { grid-template-columns: minmax(0, 1fr) !important; } .role-ui .dashboard-card, .role-ui .assignment-card { padding: 17px; } .role-ui .table-wrapper > table, .role-ui .table-container > table, .role-ui .table-responsive > table { min-width: 560px; } }
+@media (max-width: 420px) { .role-ui .page-header h1, .role-ui .page-heading h1, .role-ui .page-heading h2 { font-size: 21px; } .role-ui .btn { max-width: 100%; white-space: normal; } }
